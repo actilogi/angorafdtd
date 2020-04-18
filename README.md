@@ -1,2 +1,2 @@
 # angora
-Fork of Angora FTDT: 3D finite-difference time-domain (FDTD) electromagnetic simulation package
+Fork of Angora FDTD: 3D finite-difference time-domain (FDTD) electromagnetic simulation package
