@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -40,14 +40,30 @@ class AngoraSettingException: public AngoraException
 {// base class for all config-setting exceptions in Angora
 public:
   AngoraSettingException(const unsigned int& line_number, const string& cfg_filename) : _line_number(line_number), _cfg_filename(cfg_filename) {};
+#if (((LIBCONFIG_VER_MAJOR == 1) && (LIBCONFIG_VER_MINOR >= 4)) \
+               || (LIBCONFIG_VER_MAJOR > 1))
+            /* use the getSourceFile() feature in libconfig 1.4 and later */
+  AngoraSettingException(const Setting& setting,const string& err_msg)
+                         : _line_number(setting.getSourceLine()), _cfg_filename(setting.getSourceFile()), _err_msg(err_msg) {};
+#else
+  AngoraSettingException(const Setting& setting,const string& err_msg)
+                         : _line_number(setting.getSourceLine()), _cfg_filename(config_filename), _err_msg(err_msg) {};
+#endif
   virtual ~AngoraSettingException() throw() {};
 
   unsigned int getLineNumber() const {return _line_number;}
   string getFileName() const {return _cfg_filename;}
 
+  virtual const string getError() const {
+    ostringstream _msgstr;
+    _msgstr << getFileName() << ": line " << getLineNumber() << ": error: " << _err_msg;
+    return _msgstr.str();
+  };
+
 protected:
  const unsigned int _line_number;
  const string _cfg_filename;
+ const string _err_msg;
 };
 
 class AngoraSettingEmptyException: public AngoraSettingException

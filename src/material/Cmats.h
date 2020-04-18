@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -45,6 +45,9 @@ class Cmats
 	 {
 		 return NamedMaterials.size();
 	 }
+
+	 //maximum effective number of Lorentz poles among the materials
+	 int max_eff_num_lrntz_poles() const;
 
 private:
 	 //C++ STL map object that holds the named-material information

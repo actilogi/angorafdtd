@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -205,6 +205,10 @@ Cimg::Cimg(const ImgDataType& MyData, const string& ImgOutputFileName, const int
 		else if (number_of_layers==3)
 		{//attach a 3-layered medium transformer
 			Transformer = new Ctr_pd_3l(TransformerData,FarFieldOutputFileName,0);
+		}
+        else if (number_of_layers>3)
+		{//attach a 3-layered medium transformer
+			Transformer = new Ctr_pd_ml(TransformerData,FarFieldOutputFileName,0);
 		}
 	}
 	catch(bad_alloc& e)

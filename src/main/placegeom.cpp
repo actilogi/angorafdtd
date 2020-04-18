@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -25,7 +25,13 @@ Copyright (C) 2006-2012  Ilker R. Capoglu
 
 #include "material/Cmat.h"
 
+//Use MPI if not disabled
+#ifndef MPI_DISABLE
+#include <mpi.h>
+#endif
+
 #include <fstream>
+
 
 extern double dx,dt;
 extern int NCELLS_X,NCELLS_Y,NCELLS_Z,NPML;
@@ -35,6 +41,9 @@ extern int jleft,jright;
 extern int klower,kupper;
 
 extern int rank;
+#ifndef MPI_DISABLE
+extern MPI_Comm MPI_SubComm,MPI_CartSubComm;
+#endif
 
 extern const int PEC;
 extern const int vacuum;
@@ -1241,172 +1250,276 @@ void PlaceGround(const int& GroundCoord)
 //		cout << "Surface profile read." << endl << endl;
 //	}
 //}
-//
-//void PlaceSurfaceEngravingProfileFromFile(
-//			const string& SurfaceEngravingProfileFileName,
-//			const MaterialId& MaterialIdentifier,
-//			const int& xPos, const int& yPos, const int& zPos, const string& anchor)
-//{
-////Reads a 2D array that specifies an engraving profile. The surface is engraved at the specified height values in the array (in grid cells), and filled with the material specified by "MaterialIndex".
-//// (xPos,yPos,zPos) are the x-y-z coordinates of the anchor of the base of the engraving profile (measured in cells from the back-left-lower corner of the grid)
-//	if (rank==0)
-//	{
-//		cout << endl << "Reading surface-engraving profile from " << SurfaceEngravingProfileFileName << " ..." << endl;
-//	}
-//	ifstream SurfaceEngravingProfileFile;	//temporary ifstream object for reading the input
-//	SurfaceEngravingProfileFile.open(SurfaceEngravingProfileFileName.c_str(),ios::binary);	//open file for reading
-//	if (!SurfaceEngravingProfileFile)
-//	{
-//		cout << "Error opening surface-engraving profile input file " << SurfaceEngravingProfileFileName << "." << endl << endl;
-//		exit(-1);
-//	}
-//	int xExtent,yExtent,zExtent;	//x, y and average z extents of the material region (in cells)
-//	SurfaceEngravingProfileFile.read((char*)&xExtent,sizeof(xExtent));	//read the x extent
-//	SurfaceEngravingProfileFile.read((char*)&yExtent,sizeof(yExtent));	//read the y extent
-//	SurfaceEngravingProfileFile.read((char*)&zExtent,sizeof(zExtent));	//read the average z extent
-//
-///*	double eps_r; //relative dielectric permittivity of the homogeneous region
-//	//read the relative dielectric permittivity of the homogeneous region
-//	SurfaceEngravingProfileFile.read((char*)&eps_r,sizeof(eps_r));*/
-//
-//// 	//add the new material to the material-index array
-//// 	int surfacematerialindex = AddMaterial(eps_r,0);	//relative permittivity of the new material is eps_r
-//
-//	//calculate the coordinates of the back-left-lower corner of the region
-//	int xCornerPos=xPos;
-//	int yCornerPos=yPos;
-//	int zCornerPos=zPos;
-//	if ((anchor!="center")&&(anchor!="BLU")&&(anchor!="BLL")&&(anchor!="BRU")&&(anchor!="BRL")
-//	   					  &&(anchor!="FLU")&&(anchor!="FLL")&&(anchor!="FRU")&&(anchor!="FRL"))
-//	{
-//		if (rank==0)
-//		{
-//			cout << "Invalid anchor point \"" << anchor << "\" for surface-engraving profile input file " << SurfaceEngravingProfileFileName << " in node " << rank << endl << endl;
-//			exit(-1);
-//		}
-//	}
-//
-//	if (anchor=="center")
-//	{
-//		xCornerPos = int(xPos - xExtent/2.0);	//shift reference to the center
-//		yCornerPos = int(yPos - yExtent/2.0);	//shift reference to the center
-//		zCornerPos = int(zPos - zExtent/2.0);	//shift reference to the center
-//	}
-//	else if (anchor=="BLL")	//back-left-lower
-//	{
-//		//reference point is the back-left-lower corner by default
-//	}
-//	else if (anchor=="BLU")	//back-left-upper
-//	{
-//		zCornerPos = zPos - zExtent;	//shift reference to the upper corner
-//	}
-//	else if (anchor=="BRL")	//back-right-lower
-//	{
-//		yCornerPos = yPos - yExtent;	//shift reference to the right corner
-//	}
-//	else if (anchor=="BRU")	//back-right-upper
-//	{
-//		yCornerPos = yPos - yExtent;	//shift reference to the right corner
-//		zCornerPos = zPos - zExtent;	//shift reference to the upper corner
-//	}
-//	else if (anchor=="FLL")	//front-left-lower
-//	{
-//		xCornerPos = xPos - xExtent;	//shift reference to the front corner
-//	}
-//	else if (anchor=="FLU")	//front-left-upper
-//	{
-//		xCornerPos = xPos - xExtent;	//shift reference to the front corner
-//		zCornerPos = zPos - zExtent;	//shift reference to the upper corner
-//	}
-//	else if (anchor=="FRL")	//front-right-lower
-//	{
-//		xCornerPos = xPos - xExtent;	//shift reference to the front corner
-//		yCornerPos = yPos - yExtent;	//shift reference to the right corner
-//	}
-//	else if (anchor=="FRU")	//front-right-upper
-//	{
-//		xCornerPos = xPos - xExtent;	//shift reference to the front corner
-//		yCornerPos = yPos - yExtent;	//shift reference to the right corner
-//		zCornerPos = zPos - zExtent;	//shift reference to the upper corner
-//	}
-//
-//	//indices of the cell at the back-left-lower corner
-//	//these are simply equal to the coordinates of the back-left-lower corner plus one
-//	int xCornerCell = xCornerPos+1;
-//	int yCornerCell = yCornerPos+1;
-//	int zCornerCell = zCornerPos+1;
-//
-//	//extra and absolute thickness values at each point of the surface
-//	int extra_thickness,thickness; //in cells
-//// cout << xCornerCell << "," << yCornerCell << "," << zCornerCell << endl;
-//	//every node has to read the file, and update the necessary portions of their grid
-//	// Note that the x-y-z dimensions are written in this order in the file. Therefore, the x-rows are read first.
-//	int i,j,k;
-//	for (j=yCornerCell; j<=yCornerCell+yExtent-1; j++)
-//	{
-//		for (i=xCornerCell; i<=xCornerCell+xExtent-1; i++)
-//		{
-//			SurfaceEngravingProfileFile.read((char*)&extra_thickness,sizeof(extra_thickness));	//read the surface-profile at the (x,y) position
-//			//calculate the thickness at this (x,y) position by adding the profile value to the average thickness (zExtent)
-//			//(extra_thickness might also be negative)
-//			thickness = zExtent+extra_thickness;
-//// 			for (int k=zCornerCell; k<=zCornerCell+thickness-1; k++)
-//// 			cout << zExtent << "," << extra_thickness << endl;
-//// 			cout << xCornerCell << "," << yCornerCell << "," << zCornerCell << endl;
-//// 			exit(-1);
-//// cout << zCornerCell+thickness << endl;
-//			for (k=zCornerCell+thickness; k<=kupper+1; k++)  //from bottom of the engraving profile to the top of the grid
-//			{
-//// if ((j>=yCornerCell)&&(j<=yCornerCell+1)&&(i>=xCornerCell)&&(i<=xCornerCell+1)&&(k==(zCornerCell+thickness))){
-//// if ((j>=yCornerCell)&&(j<=yCornerCell+20)&&(i>=xCornerCell)&&(i<=xCornerCell)&&(k==(zCornerCell+thickness))){
-//// cout << i << "," << j << "," << k << endl;
-//// }
-//				//Media_Ex
-//				if ((k>=klower)&&(k<=kupper+1))
-//				{
-//					if ((j>=jleft)&&(j<=jright+1))
-//					{
-//						if ((i>=iback)&&(i<=ifront))
-//						{
-//								Media_Ex(i,j,k) = MaterialIdentifier.ElectricIndex_X; //engrave with the specified material
-//						}
-//					}
-//				}
-//
-//				//Media_Ey
-//				if ((k>=klower)&&(k<=kupper+1))
-//				{
-//					if ((j>=jleft)&&(j<=jright))
-//					{
-//						if ((i>=iback)&&(i<=ifront+1))
-//						{
-//								Media_Ey(i,j,k) = MaterialIdentifier.ElectricIndex_Y; //engrave with the specified material
-//						}
-//					}
-//				}
-//
-//				//Media_Ez
-//				if ((k>=klower)&&(k<=kupper))
-//				{
-//					if ((j>=jleft)&&(j<=jright+1))
-//					{
-//						if ((i>=iback)&&(i<=ifront+1))
-//						{
-//								Media_Ez(i,j,k) = MaterialIdentifier.ElectricIndex_Z; //engrave with the specified material
-//						}
-//					}
-//				}
-//			}
-//		}
-//	}
-//
-//	//finally, close the file
-//	SurfaceEngravingProfileFile.close();
-//	if (rank==0)
-//	{
-//		cout << "Surface-engraving profile read." << endl << endl;
-//	}
-//}
+
+void PlaceSurfaceEngravingProfileFromFile(
+			const string& SurfaceEngravingProfileFileName,
+			const int& xPos, const int& yPos, const int& zPos, const string& anchor)
+{
+//Reads a 2D array that specifies an engraving profile. The surface is engraved at the specified height values in the array (in grid cells), and filled with the material specified by "MaterialIndex".
+// (xPos,yPos,zPos) are the x-y-z coordinates of the anchor of the base of the engraving profile (measured in cells from the back-left-lower corner of the grid)
+	if (rank==0)
+	{
+		cout << endl << "Reading surface-engraving profile from " << SurfaceEngravingProfileFileName << " ..." << endl;
+	}
+	ifstream SurfaceEngravingProfileFile;	//temporary ifstream object for reading the input
+	SurfaceEngravingProfileFile.open(SurfaceEngravingProfileFileName.c_str(),ios::binary);	//open file for reading
+	if (!SurfaceEngravingProfileFile)
+	{
+		cout << "Error opening surface-engraving profile input file " << SurfaceEngravingProfileFileName << "." << endl << endl;
+		exit(-1);
+	}
+	int xExtent,yExtent;	//x and y extents of the material region (in cells)
+	SurfaceEngravingProfileFile.read((char*)&xExtent,sizeof(xExtent));	//read the x extent
+	SurfaceEngravingProfileFile.read((char*)&yExtent,sizeof(yExtent));	//read the y extent
+
+
+
+/*	double eps_r; //relative dielectric permittivity of the homogeneous region
+	//read the relative dielectric permittivity of the homogeneous region
+	SurfaceEngravingProfileFile.read((char*)&eps_r,sizeof(eps_r));*/
+
+// 	//add the new material to the material-index array
+// 	int surfacematerialindex = AddMaterial(eps_r,0);	//relative permittivity of the new material is eps_r
+
+	//calculate the coordinates of the back-left-lower corner of the region
+	int xCornerPos=xPos;
+	int yCornerPos=yPos;
+	int zCornerPos=zPos;
+	if ((anchor!="center")&&(anchor!="BL")&&(anchor!="BR")&&(anchor!="FL")&&(anchor!="FR"))
+	{
+		if (rank==0)
+		{
+			cout << "Invalid anchor point \"" << anchor << "\" for surface-engraving profile input file " << SurfaceEngravingProfileFileName << " in node " << rank << endl << endl;
+			exit(-1);
+		}
+	}
+
+	if (anchor=="center")
+	{
+		xCornerPos = int(xPos - xExtent/2.0);	//shift reference to the center
+		yCornerPos = int(yPos - yExtent/2.0);	//shift reference to the center
+	}
+	else if (anchor=="BL")	//back-left
+	{
+		//reference point is the back-left corner by default
+	}
+	else if (anchor=="BR")	//back-right
+	{
+		yCornerPos = yPos - yExtent;	//shift reference to the right corner
+	}
+	else if (anchor=="FL")	//front-left
+	{
+		xCornerPos = xPos - xExtent;	//shift reference to the front corner
+	}
+	else if (anchor=="FR")	//front-right
+	{
+		xCornerPos = xPos - xExtent;	//shift reference to the front corner
+		yCornerPos = yPos - yExtent;	//shift reference to the right corner
+	}
+
+	//indices of the cell at the back-left-lower corner
+	//these are simply equal to the coordinates of the back-left-lower corner plus one
+	int xCornerCell = xCornerPos+1;
+	int yCornerCell = yCornerPos+1;
+	int zCornerCell = zCornerPos+1;
+
+	//thickness values at each point of the surface
+	int thickness; //in cells
+	//every node has to read the file, and update the necessary portions of their grid
+	// Note that the x-y-z dimensions are written in this order in the file. Therefore, the x-rows are read first.
+
+	//read through the file to determine the maximum and minumum constitutive parameter values
+	int pos_saved = SurfaceEngravingProfileFile.tellg();	//first, save the current position of the read pointer
+
+	float max_param=0;	//maximum constitutive parameter value
+	float min_param=1e10;	//minimum constitutive parameter value
+	float param_temp;	//constitutive parameter value that has been read
+	double param_lower_limit; //lower limit of the constitutive parameter
+	int k;
+
+    param_lower_limit = 1;
+
+	for (int i=1; i<=xExtent; i++)
+	{
+		for (int j=1; j<=yExtent; j++)
+		{
+          k = thickness-1;
+          if ((k>=klower)&&(k<=kupper+1))
+          {
+            if ((j>=jleft)&&(j<=jright+1))
+            {
+              if ((i>=iback)&&(i<=ifront))
+              {
+                    SurfaceEngravingProfileFile.read((char*)&thickness,sizeof(thickness));	//read the constitutive parameter
+
+                    param_temp = eps_x(eps_x_indices(xCornerCell+i-1,yCornerCell+j-1,zCornerCell+thickness-2));
+                    param_temp = (param_temp+1.0)/2;
+
+                    if (param_temp>=param_lower_limit)
+                    {//if the value is nonpositive, don't bother with it at all
+                        if (param_temp>max_param) max_param=param_temp;	//update the maximum constitutive parameter
+                        if (param_temp<min_param) min_param=param_temp;	//update the minimum constitutive parameter
+                    }
+              }
+            }
+          }
+		}
+	}
+#ifndef MPI_DISABLE
+    float tempbuf_1 = max_param; // Temp solution for errors with MPI_IN_PLACE, may occur in IBM systems.
+    float tempbuf_2 = min_param;
+	MPI_Barrier(MPI_CartSubComm);
+	MPI_Reduce(tempbuf_1,&max_param,1,MPI_FLOAT,MPI_MAX,0,MPI_CartSubComm);
+	MPI_Reduce(tempbuf_2,&min_param,1,MPI_FLOAT,MPI_MIN,0,MPI_CartSubComm);
+	MPI_Bcast(&max_param,1,MPI_FLOAT,0,MPI_CartSubComm);
+	MPI_Bcast(&min_param,1,MPI_FLOAT,0,MPI_CartSubComm);
+#endif
+  //cout << max_param << endl;
+  //cout << min_param << endl;
+  //max_param = 5,min_param = 1;
+
+	int max_number_of_new_materials = 1000;
+	//maximum number of different material types that can be extracted from the region
+//	int max_num_of_materials = 1000; 	//pretty random, may have to find a more efficient way in the future
+	//minimum difference in constitutive parameter between different materials
+	float param_step = (max_param-min_param)/(max_number_of_new_materials-1);
+	//add the new materials to the material list
+	//before increasing the number of materials, save the current maximum material indices
+	int material_index_saved_eps_x = eps_x.size()-1;
+	int material_index_saved_eps_y = eps_y.size()-1;
+	int material_index_saved_eps_z = eps_z.size()-1;
+
+
+	//dummy material index
+	Cmat NewMaterial_surface_engraving;
+
+		for (int i=1; i<=max_number_of_new_materials; i++)
+		{
+			NewMaterial_surface_engraving.set_eps(min_param+(i-1)*param_step);
+		}
+
+
+	SurfaceEngravingProfileFile.seekg(pos_saved,ios::beg);	//return to the saved position in the file
+
+    int material_offset_surface_engraving;	//offset of the current material index beginning from the material index that was saved before the creation of new materials
+	int material_index_eps_surface_engraving;
+	int i,j;
+    Cmat upper_interf_material_surface_engraving;
+
+	for (j=yCornerCell; j<=yCornerCell+yExtent-1; j++)
+	{
+		for (i=xCornerCell; i<=xCornerCell+xExtent-1; i++)
+		{
+			SurfaceEngravingProfileFile.read((char*)&thickness,sizeof(thickness));	//read the surface-profile at the (x,y) position
+
+			for (k=zCornerCell+thickness; k<=kupper+1; k++)  //from bottom of the engraving profile to the top of the grid
+			{
+				if ((k>=klower)&&(k<=kupper+1))
+				{
+					if ((j>=jleft)&&(j<=jright+1))
+					{
+						if ((i>=iback)&&(i<=ifront))
+						{
+                         eps_x_type &eps_x_idx(eps_x_indices(i,j,k));
+                         cond_e_x_type &cond_e_x_idx(cond_e_x_indices(i,j,k));
+                         eps_x_idx=1;
+                         cond_e_x_idx=1;
+   						 Ca_X(i,j,k)=(1-dt*cond_e_x(cond_e_x_idx)/(2.0*eps_x(eps_x_idx)*epsilon_0))/
+   						             (1+dt*cond_e_x(cond_e_x_idx)/(2.0*eps_x(eps_x_idx)*epsilon_0));
+                         Cb_X(i,j,k)=dt/eps_x(eps_x_idx)/epsilon_0/dx/(1+dt*cond_e_x(cond_e_x_idx)/
+                                     (2.0*eps_x(eps_x_idx)*epsilon_0));
+						}
+					}
+				}
+
+				if ((k>=klower)&&(k<=kupper+1))
+				{
+					if ((j>=jleft)&&(j<=jright))
+					{
+						if ((i>=iback)&&(i<=ifront+1))
+						{
+                         eps_y_type &eps_y_idx(eps_y_indices(i,j,k));
+                         cond_e_y_type &cond_e_y_idx(cond_e_y_indices(i,j,k));
+                         eps_y_idx=1;
+                         cond_e_y_idx=1;
+   						 Ca_Y(i,j,k)=(1-dt*cond_e_y(cond_e_y_idx)/(2.0*eps_y(eps_y_idx)*epsilon_0))/
+   						             (1+dt*cond_e_y(cond_e_y_idx)/(2.0*eps_y(eps_y_idx)*epsilon_0));
+                         Cb_Y(i,j,k)=dt/eps_y(eps_y_idx)/epsilon_0/dx/(1+dt*cond_e_y(cond_e_y_idx)/
+                                     (2.0*eps_y(eps_y_idx)*epsilon_0));
+						}
+					}
+				}
+
+				if ((k>=klower)&&(k<=kupper))
+				{
+					if ((j>=jleft)&&(j<=jright+1))
+					{
+						if ((i>=iback)&&(i<=ifront+1))
+						{
+                         eps_z_type &eps_z_idx(eps_z_indices(i,j,k));
+                         cond_e_z_type &cond_e_z_idx(cond_e_z_indices(i,j,k));
+                         eps_z_idx=1;
+                         cond_e_z_idx=1;
+                         Ca_Z(i,j,k)=(1-dt*cond_e_z(cond_e_z_idx)/(2.0*eps_z(eps_z_idx)*epsilon_0))/
+   						             (1+dt*cond_e_z(cond_e_z_idx)/(2.0*eps_z(eps_z_idx)*epsilon_0));
+                         Cb_Z(i,j,k)=dt/eps_z(eps_z_idx)/epsilon_0/dx/(1+dt*cond_e_z(cond_e_z_idx)/
+                                     (2.0*eps_z(eps_z_idx)*epsilon_0));
+						}
+					}
+				}
+			}
+
+
+          k = zCornerCell+thickness-1;
+          if ((k>=klower)&&(k<=kupper+1))
+          {
+            if ((j>=jleft)&&(j<=jright+1))
+            {
+              if ((i>=iback)&&(i<=ifront))
+              {
+                upper_interf_material_surface_engraving.set_eps_x((eps_x(eps_x_indices(i,j,k)) + 1.0)/2.0);
+                param_temp = upper_interf_material_surface_engraving.eps_x_value();
+                material_offset_surface_engraving = (int)((param_temp-min_param)/(max_param-min_param)*(max_number_of_new_materials-1));
+                //material_offset is between 0 and (max_number_of_new_materials-1)  (both included)
+                material_index_eps_surface_engraving = material_index_saved_eps_x + (material_offset_surface_engraving + 1);	//this is the absolute index in the current material list
+                                                // +1 because of the range of material_offset above
+                //place material at the center of the cell
+                eps_x_indices(i,j,k) = material_index_eps_surface_engraving;
+                Ca_X(i,j,k)=(1-dt*cond_e_x(cond_e_x_indices(i,j,k))/(2.0*eps_x(eps_x_indices(i,j,k))*epsilon_0))/(1+dt*cond_e_x(cond_e_x_indices(i,j,k))/(2.0*eps_x(eps_x_indices(i,j,k))*epsilon_0));
+                Cb_X(i,j,k)=dt/eps_x(eps_x_indices(i,j,k))/epsilon_0/dx/(1+dt*cond_e_x(cond_e_x_indices(i,j,k))/(2.0*eps_x(eps_x_indices(i,j,k))*epsilon_0));
+                      // Fix the x,y components at the interface z-position
+              }
+            }
+          }
+          if ((k>=klower)&&(k<=kupper+1))
+          {
+            if ((j>=jleft)&&(j<=jright))
+            {
+              if ((i>=iback)&&(i<=ifront+1))
+              {
+                upper_interf_material_surface_engraving.set_eps_y((eps_y(eps_y_indices(i,j,k)) + 1.0)/2.0);
+                param_temp = upper_interf_material_surface_engraving.eps_y_value();
+                material_offset_surface_engraving = (int)((param_temp-min_param)/(max_param-min_param)*(max_number_of_new_materials-1));
+                //material_offset is between 0 and (max_number_of_new_materials-1)  (both included)
+                material_index_eps_surface_engraving = material_index_saved_eps_y + (material_offset_surface_engraving + 1);	//this is the absolute index in the current material list
+                                            // +1 because of the range of material_offset above
+                //place material on the lower side of the cell
+                eps_y_indices(i,j,k) = material_index_eps_surface_engraving;
+                Ca_Y(i,j,k)=(1-dt*cond_e_y(cond_e_y_indices(i,j,k))/(2.0*eps_y(eps_y_indices(i,j,k))*epsilon_0))/(1+dt*cond_e_y(cond_e_y_indices(i,j,k))/(2.0*eps_y(eps_y_indices(i,j,k))*epsilon_0));
+                Cb_Y(i,j,k)=dt/eps_y(eps_y_indices(i,j,k))/epsilon_0/dx/(1+dt*cond_e_y(cond_e_y_indices(i,j,k))/(2.0*eps_y(eps_y_indices(i,j,k))*epsilon_0));
+              }
+            }
+          }
+		}
+	}
+
+	//finally, close the file
+	SurfaceEngravingProfileFile.close();
+	if (rank==0)
+	{
+		cout << "Surface-engraving profile read." << endl << endl;
+	}
+}
 
 /****************************************************************************************************************/
 /****************************************************************************************************************/

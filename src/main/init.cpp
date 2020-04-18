@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -52,14 +52,14 @@ extern Array<cond_h_z_type,3> cond_h_z_indices;
 
 extern bool dispersion_exists;
 extern Array<bool,3> dispersion_exists_at_Ex_position,dispersion_exists_at_Ey_position,dispersion_exists_at_Ez_position;
-extern Array<double,3> J_p_x,J_p_y,J_p_z;
-extern Array<update_coeff_type,3> Pa_X,Pb_X,Pa_Y,Pb_Y,Pa_Z,Pb_Z;
-extern Array<omega_p_x_type,3> omega_p_x_indices;
-extern Array<omega_p_y_type,3> omega_p_y_indices;
-extern Array<omega_p_z_type,3> omega_p_z_indices;
-extern Array<tau_r_x_type,3> tau_r_x_indices;
-extern Array<tau_r_y_type,3> tau_r_y_indices;
-extern Array<tau_r_z_type,3> tau_r_z_indices;
+//extern Array<double,3> J_p_x,J_p_y,J_p_z;
+//extern Array<update_coeff_type,3> Pa_X,Pb_X,Pa_Y,Pb_Y,Pa_Z,Pb_Z;
+//extern Array<omega_p_x_type,3> omega_p_x_indices;
+//extern Array<omega_p_y_type,3> omega_p_y_indices;
+//extern Array<omega_p_z_type,3> omega_p_z_indices;
+//extern Array<tau_p_x_type,3> tau_p_x_indices;
+//extern Array<tau_p_y_type,3> tau_p_y_indices;
+//extern Array<tau_p_z_type,3> tau_p_z_indices;
 
 #ifndef MPI_DISABLE
 extern MPI_Comm MPI_SubComm,MPI_CartSubComm;
@@ -476,25 +476,25 @@ void init_grid()
 		dispersion_exists_at_Ex_position.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
 		dispersion_exists_at_Ey_position.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
 		dispersion_exists_at_Ez_position.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
-
-		/** TODO: When the resizeAndPreserve() overload with Range arguments is developed,
-		do this resizing when a new object is placed in the grid.**/
-		J_p_x.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
-		J_p_y.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
-		J_p_z.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
-		Pa_X.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
-		Pb_X.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
-		Pa_Y.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
-		Pb_Y.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
-		Pa_Z.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
-		Pb_Z.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
-		omega_p_x_indices.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
-		omega_p_y_indices.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
-		omega_p_z_indices.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
-		tau_r_x_indices.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
-		tau_r_y_indices.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
-		tau_r_z_indices.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
-		/************/
+//
+//		/** TODO: When the resizeAndPreserve() overload with Range arguments is developed,
+//		do this resizing when a new object is placed in the grid.**/
+//		J_p_x.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
+//		J_p_y.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
+//		J_p_z.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
+//		Pa_X.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
+//		Pb_X.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
+//		Pa_Y.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
+//		Pb_Y.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
+//		Pa_Z.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
+//		Pb_Z.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
+//		omega_p_x_indices.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
+//		omega_p_y_indices.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
+//		omega_p_z_indices.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
+//		tau_p_x_indices.resize(Range(iback,ifront),Range(jleft,jright+1),Range(klower,kupper+1));
+//		tau_p_y_indices.resize(Range(iback,ifront+1),Range(jleft,jright),Range(klower,kupper+1));
+//		tau_p_z_indices.resize(Range(iback,ifront+1),Range(jleft,jright+1),Range(klower,kupper));
+//		/************/
 	}
 	/** Grid arrays initialized **/
 

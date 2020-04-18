@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -50,14 +50,18 @@ typedef unsigned short omega_p_x_type;
 typedef unsigned short omega_p_y_type;
 //type for omega_p_z indices with different omega_p_z values
 typedef unsigned short omega_p_z_type;
-//type for tau_r_x indices with different tau_r_x values
-typedef unsigned short tau_r_x_type;
-//type for tau_r_y indices with different tau_r_y values
-typedef unsigned short tau_r_y_type;
-//type for tau_r_z indices with different tau_r_z values
-typedef unsigned short tau_r_z_type;
-
-typedef unsigned short blah;
+//type for tau_p_x indices with different tau_p_x values
+typedef unsigned short tau_p_x_type;
+//type for tau_p_y indices with different tau_p_y values
+typedef unsigned short tau_p_y_type;
+//type for tau_p_z indices with different tau_p_z values
+typedef unsigned short tau_p_z_type;
+//type for Omega_p_x indices with different Omega_p_x values
+typedef unsigned short Omega_p_x_type;
+//type for Omega_p_y indices with different Omega_p_y values
+typedef unsigned short Omega_p_y_type;
+//type for Omega_p_z indices with different Omega_p_z values
+typedef unsigned short Omega_p_z_type;
 
 //type for update coefficients
 typedef float update_coeff_type;

@@ -1,0 +1,28 @@
+03/23/2012 : Add documentation on circular polarization?
+
+02/22/2012: Figure out the log time/date discrepancy issue (it seems like on and off)
+
+02/23/2012: Resolve the issue of jpg placement upon compilation (maybe not an issue?)
+
+02/27/2012: Find out why "make distcheck" fails without a EXTRA_DIST=***.eps for an image file. (Manual VPATH build does NOT fail!)
+
+COMPLETED:
+**** 02/22/2012 : Change all "Geometry:" on maxwell and Quest to "SimulationSpace:".
+**** 02/22/2012: Figure out how to compile the documentation on Quest. (texinfo installation does not include texi2dvi on Quest for some reason, so pdfs could not be created)
+**** 02/23/2012: Resolve the "option" vs "variable" issues.
+**** 02/27/2012: Create deprecated-option warnings for the following: "Geometry"
+**** 11/10/2011 : Add an extra current-moment amplitude (j0) to the config option for point sources. (read_pointsources.cpp)
+**** 02/23/2012 : Fill in the concept indices at the end.
+**** 03/02/2012 : Add documentation on the "check mode".
+**** 03/15/2012 : Add documentation on config_all.cfg.
+**** 03/13/2012 : Add documentation on invalid configuration options.
+**** 03/15/2012 : Add other groups with dots (...) inside each list to indicate that there might be multiple groups.
+**** 03/23/2012 : Add documentation on the half-space limitations of Cfb and Chgb.
+**** 03/25/2012 : Add documentation on the grid anisotropy correction in Cpw**.
+**** 03/24/2012 : Add documentation on the initial state of the grid (vacuum)
+**** 03/05/2012 : Add documentation on the cutoff wavelengths of Gaussian waveforms.
+**** 03/13/2012 : Make sure permittivity/permeability/conductivity can be read on top of each other from different files.
+**** 03/13/2012 : Include H-field recording in MovieRecorders etc.
+**** 03/01/2012: Write a "Quick Reference" with a Mie-scattering example.
+**** 03/06/2012 : Find a way to install all the html and png files.
+**** 03/26/2012 : Add Linux executable (non-mpi and mpi) on website.

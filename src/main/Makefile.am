@@ -9,6 +9,7 @@ AM_LDFLAGS = -static
 noinst_LTLIBRARIES = libmain.la
 libmain_la_SOURCES = init.cpp init.h \
 	initgeom.cpp initgeom.h \
+	init_disp.cpp init_disp.h \
 	place_obj.cpp place_obj.h \
 	placegeom.cpp placegeom.h \
 	matfile.h \

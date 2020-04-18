@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -33,11 +33,6 @@ extern int NCELLS_X,NCELLS_Y,NCELLS_Z,NPML;
 extern Array<double,3> Ex,Ey,Ez;
 extern Array<double,3> Hx,Hy,Hz;
 
-//extern int num_of_distinct_eps_x,num_of_distinct_eps_y,num_of_distinct_eps_z;
-//extern int num_of_distinct_mu_x,num_of_distinct_mu_y,num_of_distinct_mu_z;
-//extern int num_of_distinct_cond_e_x,num_of_distinct_cond_e_y,num_of_distinct_cond_e_z;
-//extern int num_of_distinct_cond_h_x,num_of_distinct_cond_h_y,num_of_distinct_cond_h_z;
-
 extern const int PEC;
 extern const int vacuum;
 
@@ -56,12 +51,12 @@ extern Array<cond_e_z_type,3> cond_e_z_indices;
 extern Array<cond_h_x_type,3> cond_h_x_indices;
 extern Array<cond_h_y_type,3> cond_h_y_indices;
 extern Array<cond_h_z_type,3> cond_h_z_indices;
-extern Array<omega_p_x_type,3> omega_p_x_indices;
-extern Array<omega_p_y_type,3> omega_p_y_indices;
-extern Array<omega_p_z_type,3> omega_p_z_indices;
-extern Array<tau_r_x_type,3> tau_r_x_indices;
-extern Array<tau_r_y_type,3> tau_r_y_indices;
-extern Array<tau_r_z_type,3> tau_r_z_indices;
+//extern Array<omega_p_x_type,3> omega_p_x_indices;
+//extern Array<omega_p_y_type,3> omega_p_y_indices;
+//extern Array<omega_p_z_type,3> omega_p_z_indices;
+//extern Array<tau_p_x_type,3> tau_p_x_indices;
+//extern Array<tau_p_y_type,3> tau_p_y_indices;
+//extern Array<tau_p_z_type,3> tau_p_z_indices;
 
 extern Array<eps_x_type,1> eps_x_indices_on_z_axis;
 extern Array<eps_y_type,1> eps_y_indices_on_z_axis;
@@ -76,14 +71,13 @@ extern Array<cond_h_x_type,1> cond_h_x_indices_on_z_axis;
 extern Array<cond_h_y_type,1> cond_h_y_indices_on_z_axis;
 extern Array<cond_h_z_type,1> cond_h_z_indices_on_z_axis;
 
-//extern Array<double,1> Ca_X,Cb_X,Ca_Y,Cb_Y,Ca_Z,Cb_Z;
-//extern Array<double,1> Da_X,Db_X,Da_Y,Db_Y,Da_Z,Db_Z;
-
 extern Array<float,1> eps_x,eps_y,eps_z;
 extern Array<float,1> cond_e_x,cond_e_y,cond_e_z;
 extern Array<float,1> mu_x,mu_y,mu_z;
 extern Array<float,1> cond_h_x,cond_h_y,cond_h_z;
-extern Array<float,1> omega_p_x,omega_p_y,omega_p_z,tau_r_x,tau_r_y,tau_r_z;
+extern Array<float,1> omega_p_x,omega_p_y,omega_p_z,
+                      tau_p_x,tau_p_y,tau_p_z,
+                      Omega_p_x,Omega_p_y,Omega_p_z;
 
 extern Array<double,1> inv_kappa_e_x,inv_kappa_e_y,inv_kappa_e_z,inv_kappa_h_x,inv_kappa_h_y,inv_kappa_h_z;
 
@@ -92,8 +86,8 @@ extern double c_upper,c_lower;
 
 extern bool dispersion_exists;
 extern Array<bool,3> dispersion_exists_at_Ex_position,dispersion_exists_at_Ey_position,dispersion_exists_at_Ez_position;
-extern Array<double,3> J_p_x,J_p_y,J_p_z;
-extern Array<update_coeff_type,3> Pa_X,Pb_X,Pa_Y,Pb_Y,Pa_Z,Pb_Z;
+//extern Array<double,3> J_p_x,J_p_y,J_p_z;
+//extern Array<update_coeff_type,3> Pa_X,Pb_X,Pa_Y,Pb_Y,Pa_Z,Pb_Z;
 
 extern double max_field_value;
 extern bool max_field_value_set_in_configfile;
@@ -103,36 +97,9 @@ extern bool dB_accuracy_set_in_configfile;
 
 void init_geom()
 {//resets the material information and assigns vacuum to the entire grid
-	//the following is not automatic, since named materials are handled in the object Cmats
-//	/** FIXME: This is not the most ideal solution **/
-//	//initialize the array of named (tagged) materials to zero length
-//	InitializeNamedMaterialArray();
-//	/** FIXME: This is not the most ideal solution **/
 
 	//set the initial time value to 0
-//	allow_setting_initial_time_value();
 	set_initial_time_value(0);
-
-	//Initialize some global variables
-	//initially, there are only 2 materials: vacuum and PEC
-//	NumOfElectricMaterials_X = 2;
-//	NumOfElectricMaterials_Y = 2;
-//	NumOfElectricMaterials_Z = 2;
-//	NumOfMagneticMaterials_X = 2;
-//	NumOfMagneticMaterials_Y = 2;
-//	NumOfMagneticMaterials_Z = 2;
-//	num_of_distinct_eps_x = 2;
-//	num_of_distinct_eps_y = 2;
-//	num_of_distinct_eps_z = 2;
-//	num_of_distinct_mu_x = 2;
-//	num_of_distinct_mu_y = 2;
-//	num_of_distinct_mu_z = 2;
-//	num_of_distinct_cond_e_x = 2;
-//	num_of_distinct_cond_e_y = 2;
-//	num_of_distinct_cond_e_z = 2;
-//	num_of_distinct_cond_h_x = 2;
-//	num_of_distinct_cond_h_y = 2;
-//	num_of_distinct_cond_h_z = 2;
 
 	epsilon_r_upper=1; 	//relative permittivity of the uppermost layer (changed only through PlaceSlab in geometry.cpp)
 	epsilon_r_lower=1; 	//relative permittivity of the lowermost layer (changed only through PlaceSlab in geometry.cpp)
@@ -151,10 +118,10 @@ void init_geom()
 	Hx=0;
 	Hy=0;
 	Hz=0;
-	//Initialize polarization current arrays
-	J_p_x=0;
-	J_p_y=0;
-	J_p_z=0;
+//	//Initialize polarization current arrays
+//	J_p_x=0;
+//	J_p_y=0;
+//	J_p_z=0;
 	//Place materials
 	eps_x_indices=vacuum;
 	eps_y_indices=vacuum;
@@ -168,12 +135,12 @@ void init_geom()
 	cond_h_x_indices=vacuum;
 	cond_h_y_indices=vacuum;
 	cond_h_z_indices=vacuum;
-	omega_p_x_indices=vacuum;
-	omega_p_y_indices=vacuum;
-	omega_p_z_indices=vacuum;
-	tau_r_x_indices=vacuum;
-	tau_r_y_indices=vacuum;
-	tau_r_z_indices=vacuum;
+//	omega_p_x_indices=vacuum;
+//	omega_p_y_indices=vacuum;
+//	omega_p_z_indices=vacuum;
+//	tau_p_x_indices=vacuum;
+//	tau_p_y_indices=vacuum;
+//	tau_p_z_indices=vacuum;
 
 	//Allocate and initialize constitutive parameter arrays
 	eps_x.resize(2);
@@ -191,9 +158,12 @@ void init_geom()
 	omega_p_x.resize(2);
 	omega_p_y.resize(2);
 	omega_p_z.resize(2);
-	tau_r_x.resize(2);
-	tau_r_y.resize(2);
-	tau_r_z.resize(2);
+	tau_p_x.resize(2);
+	tau_p_y.resize(2);
+	tau_p_z.resize(2);
+	Omega_p_x.resize(2);
+	Omega_p_y.resize(2);
+	Omega_p_z.resize(2);
 
 	//Initialize constitutive parameter vectors:
 	//relative permittivities
@@ -212,14 +182,18 @@ void init_geom()
 	cond_h_x = 0;
 	cond_h_y = 0;
 	cond_h_z = 0;
-	//Drude pole frequencies
+	//Lorentz pole frequencies
 	omega_p_x = 0;
 	omega_p_y = 0;
 	omega_p_z = 0;
-	//Drude pole relaxation times
-	tau_r_x = 0;
-	tau_r_y = 0;
-	tau_r_z = 0;
+	//Lorentz pole relaxation times
+	tau_p_x = 0;
+	tau_p_y = 0;
+	tau_p_z = 0;
+	//Lorentz pole frequency x sqrt(delta_eps)
+	Omega_p_x = 0;
+	Omega_p_y = 0;
+	Omega_p_z = 0;
 
 	//electric permittivity for PEC material (does not matter unless permittivity profile is visualized)
 	//This is supposed to represent "infinity". Better and more portable value for the "maximum double value" can be found later.
@@ -305,28 +279,12 @@ void init_geom()
 	dispersion_exists_at_Ey_position = false;
 	dispersion_exists_at_Ez_position = false;
 
-	// Polarization-current update coefficients for default material (vacuum)
-	Pa_X=1.0;
-	Pb_X=0.0;
-	Pa_Y=1.0;
-	Pb_Y=0.0;
-	Pa_Z=1.0;
-	Pb_Z=0.0;
+//	// Polarization-current update coefficients for default material (vacuum)
+//	Pa_X=1.0;
+//	Pb_X=0.0;
+//	Pa_Y=1.0;
+//	Pb_Y=0.0;
+//	Pa_Z=1.0;
+//	Pb_Z=0.0;
 
-////if ((i==31)&&(j==31)&&(k==31))
-////{
-//	cout << Ca_X(33,33,33) << endl;
-//	cout << Cb_X(33,33,33) << endl;
-//	cout << Ca_Y(33,33,33) << endl;
-//	cout << Cb_Y(33,33,33) << endl;
-//	cout << Ca_Z(33,33,33) << endl;
-//	cout << Cb_Z(33,33,33) << endl;
-//	cout << Da_X(33,33,33) << endl;
-//	cout << Db_X(33,33,33) << endl;
-//	cout << Da_Y(33,33,33) << endl;
-//	cout << Db_Y(33,33,33) << endl;
-//	cout << Da_Z(33,33,33) << endl;
-//	cout << Db_Z(33,33,33) << endl;
-//	exit(-1);
-////}
 } //init_geom

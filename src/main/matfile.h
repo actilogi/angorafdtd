@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -50,7 +50,7 @@ extern int klower,kupper;
 //extern int num_of_distinct_cond_e_x,num_of_distinct_cond_e_y,num_of_distinct_cond_e_z;
 //extern int num_of_distinct_cond_h_x,num_of_distinct_cond_h_y,num_of_distinct_cond_h_z;
 
-extern Array<update_coeff_type,3> Ca_X,Cb_X,Ca_Y,Cb_Y,Ca_Z,Cb_Z;
+extern Array<update_coeff_type,3> Ca_X,Cb_X,Cc_X,Ca_Y,Cb_Y,Cc_Y,Ca_Z,Cb_Z,Cc_Z;
 extern Array<update_coeff_type,3> Da_X,Db_X,Da_Y,Db_Y,Da_Z,Db_Z;
 
 extern Array<eps_x_type,3> eps_x_indices;
@@ -71,13 +71,27 @@ extern Array<float,1> mu_x,mu_y,mu_z;
 extern Array<float,1> cond_e_x,cond_e_y,cond_e_z;
 extern Array<float,1> cond_h_x,cond_h_y,cond_h_z;
 
+extern Array<bool,3> dispersion_exists_at_Ex_position,dispersion_exists_at_Ey_position,dispersion_exists_at_Ez_position;
+extern Array<update_coeff_type,4> alpha_X,xi_X,gamma_X,alpha_Y,xi_Y,gamma_Y,alpha_Z,xi_Z,gamma_Z;
+extern Array<omega_p_x_type,4> omega_p_x_indices;
+extern Array<omega_p_y_type,4> omega_p_y_indices;
+extern Array<omega_p_z_type,4> omega_p_z_indices;
+extern Array<tau_p_x_type,4> tau_p_x_indices;
+extern Array<tau_p_y_type,4> tau_p_y_indices;
+extern Array<tau_p_z_type,4> tau_p_z_indices;
+extern Array<Omega_p_x_type,4> Omega_p_x_indices;
+extern Array<Omega_p_y_type,4> Omega_p_y_indices;
+extern Array<Omega_p_z_type,4> Omega_p_z_indices;
+extern Array<float,1> omega_p_x,omega_p_y,omega_p_z,
+                      tau_p_x,tau_p_y,tau_p_z,
+                      Omega_p_x,Omega_p_y,Omega_p_z;
+
 
 template<typename MatType> //data type for the material property
 void PlaceMaterialRegionFromFile(const string& MaterialFileName, const int& xPos, const int& yPos, const int& zPos, const string& anchor, const string& constitutive_param_type, const int& max_number_of_new_materials = ANGORA_MAX_NEWMAT, const_Cshape_shared_ptr shape_mask = const_Cshape_shared_ptr(new Cuniverse()))
 {//Reads rectangular-prism-shaped dielectric region from file and places into grid
 // (xPos,yPos,zPos) are the x-y-z coordinates of the anchor of the region (measured in cells from the back-left-lower corner of the grid)
-
-	if ((constitutive_param_type!="rel_permittivity")&&(constitutive_param_type!="rel_permeability")&&(constitutive_param_type!="electric_conductivity")&&(constitutive_param_type!="magnetic_conductivity"))
+	if ((constitutive_param_type!="rel_permittivity")&&(constitutive_param_type!="rel_permeability")&&(constitutive_param_type!="electric_conductivity")&&(constitutive_param_type!="magnetic_conductivity")&&(constitutive_param_type!="lorentz_delta_epsilon"))
 	{
 #ifdef __GNUG__
 //GNU C++ compiler is being used, use the nice predefined variables for the function name
@@ -87,8 +101,9 @@ void PlaceMaterialRegionFromFile(const string& MaterialFileName, const int& xPos
 		string func_name = "";
 #endif
 		throw AngoraInvalidArgumentExceptionWithType<string>(func_name,constitutive_param_type,
-			"(valid arguments are \"rel_permittivity\", \"rel_permeability\", \"electric_conductivity\", and \"magnetic_conductivity\")");
+			"(valid arguments are \"rel_permittivity\", \"rel_permeability\", \"electric_conductivity\", \"magnetic_conductivity\", and \"lorentz_delta_epsilon\")");
 	}
+
 
 	ifstream MaterialFile;	//temporary ifstream object for reading the input
 	MaterialFile.open(MaterialFileName.c_str(),ios::binary);	//open file for reading
@@ -105,14 +120,14 @@ void PlaceMaterialRegionFromFile(const string& MaterialFileName, const int& xPos
 	//read through the file to determine the maximum and minumum constitutive parameter values
 	int pos_saved = MaterialFile.tellg();	//first, save the current position of the read pointer
 	MatType max_param=0;	//maximum constitutive parameter value
-	MatType min_param=1e10;	//minimum constitutive parameter value
+	MatType min_param=1e20;	//minimum constitutive parameter value
 	MatType param_temp;	//constitutive parameter value that has been read
 	double param_lower_limit; //lower limit of the constitutive parameter
 	if ((constitutive_param_type=="rel_permittivity")||(constitutive_param_type=="rel_permeability"))
 	{
 		param_lower_limit = 1;
 	}
-	else if ((constitutive_param_type=="electric_conductivity")||(constitutive_param_type=="magnetic_conductivity"))
+	else if ((constitutive_param_type=="electric_conductivity")||(constitutive_param_type=="magnetic_conductivity")||(constitutive_param_type=="lorentz_delta_epsilon"))
 	{
 		param_lower_limit = 0;
 	}
@@ -153,6 +168,9 @@ void PlaceMaterialRegionFromFile(const string& MaterialFileName, const int& xPos
 	int material_index_saved_cond_h_x = cond_h_x.size()-1;
 	int material_index_saved_cond_h_y = cond_h_y.size()-1;
 	int material_index_saved_cond_h_z = cond_h_z.size()-1;
+	int material_index_saved_Omega_p_x = Omega_p_x.size()-1;
+	int material_index_saved_Omega_p_y = Omega_p_y.size()-1;
+	int material_index_saved_Omega_p_z = Omega_p_z.size()-1;
 	//dummy material index
 	Cmat NewMaterial;
 	if ((constitutive_param_type=="rel_permittivity"))
@@ -183,12 +201,19 @@ void PlaceMaterialRegionFromFile(const string& MaterialFileName, const int& xPos
 			NewMaterial.set_cond_h(min_param+(i-1)*param_step);
 		}
 	}
-
+    if ((constitutive_param_type=="lorentz_delta_epsilon"))
+	{//the magnetic conductivity (in Ohm/m) of the new material is min_param+(i-1)*param_step
+		for (int i=1; i<=max_number_of_new_materials; i++)
+		{
+			NewMaterial.set_Omega_p(min_param+(i-1)*param_step);
+		}
+	}
+	//cout<<Omega_p_x<<endl;
 	MaterialFile.seekg(pos_saved,ios::beg);	//return to the saved position in the file
 
 	//now, read through the file again, determine the material index for each point, and update the material indices in the main grid
 	int material_offset;	//offset of the current material index beginning from the material index that was saved before the creation of new materials
-	int material_index_eps,material_index_cond_e,material_index_mu,material_index_cond_h;		//material indices at a given point
+	int material_index_eps,material_index_cond_e,material_index_mu,material_index_cond_h,material_index_Omega_p;		//material indices at a given point
 
 	//calculate the coordinates of the back-left-lower corner of the region
 	int xCornerPos=xPos;
@@ -561,6 +586,123 @@ void PlaceMaterialRegionFromFile(const string& MaterialFileName, const int& xPos
 			}
 		}
 	}
+
+    if (constitutive_param_type=="lorentz_delta_epsilon")
+	{
+		for (int k=zCornerCell; k<=zCornerCell+zExtentInCells-1; k++)
+		{
+			for (int j=yCornerCell; j<=yCornerCell+yExtentInCells-1; j++)
+			{
+				MaterialFile.read((char*)material_row.data(),xExtentInCells*sizeof(material_row(0)));	//read the constitutive parameter x-row into temporary array
+				if ((k>=klower)&&(k<=kupper+1)&&(j>=jleft)&&(j<=jright+1))
+				{
+					for (int i=max(iback,xCornerCell); i<=min(ifront,xCornerCell+xExtentInCells-1); i++)
+					{
+						param_temp = material_row(i);
+						if (shape_mask->IsInside(i-0.5,j-1,k-1))
+						{
+							if (param_temp>=min_param)
+							{//if the value is nonpositive, don't bother with it at all
+								material_offset = (int)((param_temp-min_param)/(max_param-min_param)*(max_number_of_new_materials-1));
+								//material_offset is between 0 and (max_number_of_new_materials-1)  (both included)
+								material_index_Omega_p = material_index_saved_Omega_p_x + (material_offset + 1);	//this is the absolute index in the current material list
+																// +1 because of the range of material_offset above
+								//place material at the center of the cell
+								Omega_p_x_indices(i,j,k,0) = material_index_Omega_p;
+                                alpha_X(i,j,k,0) = (2-pow2(omega_p_x(omega_p_x_indices(i,j,k,0))*dt))/
+                                                   (1+1/tau_p_x(tau_p_x_indices(i,j,k,0))*dt);
+                                xi_X(i,j,k,0) = (1/tau_p_x(tau_p_x_indices(i,j,k,0))*dt-1)/
+                                                (1/tau_p_x(tau_p_x_indices(i,j,k,0))*dt+1);
+                                gamma_X(i,j,k,0) = (epsilon_0*pow2(Omega_p_x(Omega_p_x_indices(i,j,k,0))*dt))/
+                                                   (1/tau_p_x(tau_p_x_indices(i,j,k,0))*dt+1)/(2*dt);
+
+                                float gamma_p_sum(0.0);
+                                gamma_p_sum = 0.5*gamma_X(i,j,k,0)*(2*dt);
+
+                                Ca_X(i,j,k) = (2*epsilon_0*eps_x(eps_x_indices(i,j,k))-cond_e_x(cond_e_x_indices(i,j,k))*dt)/
+                                    (2*epsilon_0*eps_x(eps_x_indices(i,j,k))+gamma_p_sum+cond_e_x(cond_e_x_indices(i,j,k))*dt);
+                                Cb_X(i,j,k) = 2*dt/dx/
+                                    (2*epsilon_0*eps_x(eps_x_indices(i,j,k))+gamma_p_sum+cond_e_x(cond_e_x_indices(i,j,k))*dt);
+                                Cc_X(i,j,k) = gamma_p_sum/
+                                    (2*epsilon_0*eps_x(eps_x_indices(i,j,k))+gamma_p_sum+cond_e_x(cond_e_x_indices(i,j,k))*dt);
+
+							}
+						}
+					}
+				}
+
+				if ((k>=klower)&&(k<=kupper+1)&&(j>=jleft)&&(j<=jright))
+				{
+					for (int i=max(iback,xCornerCell); i<=min(ifront+1,xCornerCell+xExtentInCells-1); i++)
+					{
+						param_temp = material_row(i);
+						if (shape_mask->IsInside(i-1,j-0.5,k-1))
+						{
+							if (param_temp>=min_param)
+							{//if the value is nonpositive, don't bother with it at all
+								material_offset = (int)((param_temp-min_param)/(max_param-min_param)*(max_number_of_new_materials-1));
+								//material_offset is between 0 and (max_number_of_new_materials-1)  (both included)
+								material_index_Omega_p = material_index_saved_Omega_p_y + (material_offset + 1);	//this is the absolute index in the current material list																	// +1 because of the range of material_offset above
+								//place material on the lower side of the cell
+								Omega_p_y_indices(i,j,k,0) = material_index_Omega_p;
+                                alpha_Y(i,j,k,0) = (2-pow2(omega_p_y(omega_p_y_indices(i,j,k,0))*dt))/
+                                                   (1+1/tau_p_y(tau_p_y_indices(i,j,k,0))*dt);
+                                xi_Y(i,j,k,0) = (1/tau_p_y(tau_p_y_indices(i,j,k,0))*dt-1)/
+                                                (1/tau_p_y(tau_p_y_indices(i,j,k,0))*dt+1);
+                                gamma_Y(i,j,k,0) = (epsilon_0*pow2(Omega_p_y(Omega_p_y_indices(i,j,k,0))*dt))/
+                                                   (1/tau_p_y(tau_p_y_indices(i,j,k,0))*dt+1)/(2*dt);
+
+                                float gamma_p_sum(0.0);
+                                gamma_p_sum += 0.5*gamma_Y(i,j,k,0)*(2*dt);
+                                Ca_Y(i,j,k) = (2*epsilon_0*eps_y(eps_y_indices(i,j,k))-cond_e_y(cond_e_y_indices(i,j,k))*dt)/
+                                    (2*epsilon_0*eps_y(eps_y_indices(i,j,k))+gamma_p_sum+cond_e_y(cond_e_y_indices(i,j,k))*dt);
+                                Cb_Y(i,j,k) = 2*dt/dx/
+                                    (2*epsilon_0*eps_y(eps_y_indices(i,j,k))+gamma_p_sum+cond_e_y(cond_e_y_indices(i,j,k))*dt);
+                                Cc_Y(i,j,k) = gamma_p_sum/
+                                    (2*epsilon_0*eps_y(eps_y_indices(i,j,k))+gamma_p_sum+cond_e_y(cond_e_y_indices(i,j,k))*dt);
+							}
+						}
+					}
+				}
+
+				if ((k>=klower)&&(k<=kupper)&&(j>=jleft)&&(j<=jright+1))
+				{
+					for (int i=max(iback,xCornerCell); i<=min(ifront+1,xCornerCell+xExtentInCells-1); i++)
+					{
+						param_temp = material_row(i);
+						if (shape_mask->IsInside(i-1,j-1,k-0.5))
+						{
+						    if (param_temp>=min_param)
+							{//if the value is nonpositive, don't bother with it at all
+								material_offset = (int)((param_temp-min_param)/(max_param-min_param)*(max_number_of_new_materials-1));
+								//material_offset is between 0 and (max_number_of_new_materials-1)  (both included)
+								material_index_Omega_p = material_index_saved_Omega_p_z + (material_offset + 1);	//this is the absolute index in the current material list
+																// +1 because of the range of material_offset above
+								//place material on the left side of the cell
+								Omega_p_z_indices(i,j,k,0) = material_index_Omega_p;
+
+                                alpha_Z(i,j,k,0) = (2-pow2(omega_p_z(omega_p_z_indices(i,j,k,0))*dt))/
+                                                   (1+1/tau_p_z(tau_p_z_indices(i,j,k,0))*dt);
+                                xi_Z(i,j,k,0) = (1/tau_p_z(tau_p_z_indices(i,j,k,0))*dt-1)/
+                                                (1/tau_p_z(tau_p_z_indices(i,j,k,0))*dt+1);
+                                gamma_Z(i,j,k,0) = (epsilon_0*pow2(Omega_p_z(Omega_p_z_indices(i,j,k,0))*dt))/
+                                                   (1/tau_p_z(tau_p_z_indices(i,j,k,0))*dt+1)/(2*dt);
+                                float gamma_p_sum(0.0);
+                                gamma_p_sum += 0.5*gamma_Z(i,j,k,0)*(2*dt);
+                                Ca_Z(i,j,k) = (2*epsilon_0*eps_z(eps_z_indices(i,j,k))-cond_e_z(cond_e_z_indices(i,j,k))*dt)/
+                                    (2*epsilon_0*eps_z(eps_z_indices(i,j,k))+gamma_p_sum+cond_e_z(cond_e_z_indices(i,j,k))*dt);
+                                Cb_Z(i,j,k) = 2*dt/dx/
+                                    (2*epsilon_0*eps_z(eps_z_indices(i,j,k))+gamma_p_sum+cond_e_z(cond_e_z_indices(i,j,k))*dt);
+                                Cc_Z(i,j,k) = gamma_p_sum/
+                                    (2*epsilon_0*eps_z(eps_z_indices(i,j,k))+gamma_p_sum+cond_e_z(cond_e_z_indices(i,j,k))*dt);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 
 	//finally, close the file
 	MaterialFile.close();

@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -22,6 +22,9 @@ Copyright (C) 2006-2012  Ilker R. Capoglu
 #ifndef CMAT_H
 #define CMAT_H
 
+//for the vector STL class
+#include <vector>
+
 #include "Cmat_excp.h"
 
 #include "Cmat_types.h"
@@ -41,18 +44,22 @@ typedef boost::shared_ptr<cond_e_z_type> cond_e_z_type_ptr;
 typedef boost::shared_ptr<cond_h_x_type> cond_h_x_type_ptr;
 typedef boost::shared_ptr<cond_h_y_type> cond_h_y_type_ptr;
 typedef boost::shared_ptr<cond_h_z_type> cond_h_z_type_ptr;
-typedef boost::shared_ptr<omega_p_x_type> omega_p_x_type_ptr;
-typedef boost::shared_ptr<omega_p_y_type> omega_p_y_type_ptr;
-typedef boost::shared_ptr<omega_p_z_type> omega_p_z_type_ptr;
-typedef boost::shared_ptr<tau_r_x_type> tau_r_x_type_ptr;
-typedef boost::shared_ptr<tau_r_y_type> tau_r_y_type_ptr;
-typedef boost::shared_ptr<tau_r_z_type> tau_r_z_type_ptr;
+typedef vector<omega_p_x_type> omega_p_x_vec;
+typedef vector<omega_p_y_type> omega_p_y_vec;
+typedef vector<omega_p_z_type> omega_p_z_vec;
+typedef vector<tau_p_x_type> tau_p_x_vec;
+typedef vector<tau_p_y_type> tau_p_y_vec;
+typedef vector<tau_p_z_type> tau_p_z_vec;
+typedef vector<Omega_p_x_type> Omega_p_x_vec;
+typedef vector<Omega_p_y_type> Omega_p_y_vec;
+typedef vector<Omega_p_z_type> Omega_p_z_vec;
 
 
 class Cmat
 {
 public:
-	void set_to_vacuum();
+	Cmat();
+
 	void set_eps(const float& epsilon_r);
 	void set_eps_x(const float& epsilon_r_x);
 	void set_eps_y(const float& epsilon_r_y);
@@ -69,14 +76,11 @@ public:
 	void set_cond_h_x(const float& cond_h_x);
 	void set_cond_h_y(const float& cond_h_y);
 	void set_cond_h_z(const float& cond_h_z);
-	void set_omega_p(const float& omega);
-	void set_omega_p_x(const float& omega);
-	void set_omega_p_y(const float& omega);
-	void set_omega_p_z(const float& omega);
-	void set_tau_r(const float& tau);
-	void set_tau_r_x(const float& tau);
-	void set_tau_r_y(const float& tau);
-	void set_tau_r_z(const float& tau);
+	void set_Omega_p(const float& Omega);
+    void add_drude_pole(const float& omega_p,const float& tau_p);
+    void add_lorentz_pole(const float& omega_p,
+                      const float& delta_p,
+                      const float& deps_p);
 
 	bool eps_x_exists() const;
 	bool eps_y_exists() const;
@@ -90,12 +94,6 @@ public:
 	bool cond_h_x_exists() const;
 	bool cond_h_y_exists() const;
 	bool cond_h_z_exists() const;
-	bool omega_p_x_exists() const;
-	bool omega_p_y_exists() const;
-	bool omega_p_z_exists() const;
-	bool tau_r_x_exists() const;
-	bool tau_r_y_exists() const;
-	bool tau_r_z_exists() const;
 
 	eps_x_type eps_x_index() const;
 	eps_y_type eps_y_index() const;
@@ -109,12 +107,15 @@ public:
 	cond_h_x_type cond_h_x_index() const;
 	cond_h_y_type cond_h_y_index() const;
 	cond_h_z_type cond_h_z_index() const;
-	omega_p_x_type omega_p_x_index() const;
-	omega_p_y_type omega_p_y_index() const;
-	omega_p_z_type omega_p_z_index() const;
-	tau_r_x_type tau_r_x_index() const;
-	tau_r_y_type tau_r_y_index() const;
-	tau_r_z_type tau_r_z_index() const;
+	omega_p_x_type omega_p_x_index(const int& p) const;
+	omega_p_y_type omega_p_y_index(const int& p) const;
+	omega_p_z_type omega_p_z_index(const int& p) const;
+	tau_p_x_type tau_p_x_index(const int& p) const;
+	tau_p_y_type tau_p_y_index(const int& p) const;
+	tau_p_z_type tau_p_z_index(const int& p) const;
+	Omega_p_x_type Omega_p_x_index(const int& p) const;
+	Omega_p_y_type Omega_p_y_index(const int& p) const;
+	Omega_p_z_type Omega_p_z_index(const int& p) const;
 
 	float eps_x_value() const;
 	float eps_y_value() const;
@@ -128,12 +129,21 @@ public:
 	float cond_h_x_value() const;
 	float cond_h_y_value() const;
 	float cond_h_z_value() const;
-	float omega_p_x_value() const;
-	float omega_p_y_value() const;
-	float omega_p_z_value() const;
-	float tau_r_x_value() const;
-	float tau_r_y_value() const;
-	float tau_r_z_value() const;
+	float omega_p_x_value(const int& p) const;
+	float omega_p_y_value(const int& p) const;
+	float omega_p_z_value(const int& p) const;
+	float tau_p_x_value(const int& p) const;
+	float tau_p_y_value(const int& p) const;
+	float tau_p_z_value(const int& p) const;
+	float Omega_p_x_value(const int& p) const;
+	float Omega_p_y_value(const int& p) const;
+	float Omega_p_z_value(const int& p) const;
+
+	int tot_num_lrntz_poles() const {
+	  return _num_lrntz_poles;
+	}
+
+	int eff_num_lrntz_poles() const;
 
 private:
 	eps_x_type_ptr _eps_x_ptr;
@@ -148,12 +158,18 @@ private:
 	cond_h_x_type_ptr _cond_h_x_ptr;
 	cond_h_y_type_ptr _cond_h_y_ptr;
 	cond_h_z_type_ptr _cond_h_z_ptr;
-	omega_p_x_type_ptr _omega_p_x_ptr;
-	omega_p_y_type_ptr _omega_p_y_ptr;
-	omega_p_z_type_ptr _omega_p_z_ptr;
-	tau_r_x_type_ptr _tau_r_x_ptr;
-	tau_r_y_type_ptr _tau_r_y_ptr;
-	tau_r_z_type_ptr _tau_r_z_ptr;
+
+	int _num_lrntz_poles; //changed only by add_**() methods
+
+	omega_p_x_vec _omega_p_x_vec;
+	omega_p_y_vec _omega_p_y_vec;
+	omega_p_z_vec _omega_p_z_vec;
+	tau_p_x_vec _tau_p_x_vec;
+	tau_p_y_vec _tau_p_y_vec;
+	tau_p_z_vec _tau_p_z_vec;
+	Omega_p_x_vec _Omega_p_x_vec;
+	Omega_p_y_vec _Omega_p_y_vec;
+	Omega_p_z_vec _Omega_p_z_vec;
 
 };
 

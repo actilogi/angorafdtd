@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -99,7 +99,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Back face of the virtual surface - Use Ez
 	if (Back_Ez_PassesThroughNode)
 	{
@@ -116,7 +115,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Front face of the virtual surface - Use Ey
 	if (Front_Ey_PassesThroughNode)
 	{
@@ -133,7 +131,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Front face of the virtual surface - Use Ez
 	if (Front_Ez_PassesThroughNode)
 	{
@@ -150,7 +147,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Left face of the virtual surface - Use Ex
 	if (Left_Ex_PassesThroughNode)
 	{
@@ -167,7 +163,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Left face of the virtual surface - Use Ez
 	if (Left_Ez_PassesThroughNode)
 	{
@@ -184,7 +179,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Right face of the virtual surface - Use Ex
 	if (Right_Ex_PassesThroughNode)
 	{
@@ -201,7 +195,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Right face of the virtual surface - Use Ez
 	if (Right_Ez_PassesThroughNode)
 	{
@@ -218,7 +211,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Lower face of the virtual surface - Use Ex
 	if (Lower_Ex_PassesThroughNode)
 	{
@@ -235,7 +227,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Lower face of the virtual surface - Use Ey
 	if (Lower_Ey_PassesThroughNode)
 	{
@@ -252,7 +243,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Upper face of the virtual surface - Use Ex
 	if (Upper_Ex_PassesThroughNode)
 	{
@@ -269,7 +259,6 @@ void Ctr_pd::UpdateMagnetic(const int& n)
 			}
 		}
 	}
-
 	//Upper face of the virtual surface - Use Ey
 	if (Upper_Ey_PassesThroughNode)
 	{

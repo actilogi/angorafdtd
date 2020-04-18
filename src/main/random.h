@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -84,7 +84,7 @@ void PlaceWMCorrRandomBlock
    The permittivity, permeability, electric_conductivity, or the magnetic conductivity can be changed with this function.
 */
 	//The following is copied from PlaceMaterialRegionFromFile in order to avoid calculating the material region unnecessarily
-	if ((constitutive_param_type!="rel_permittivity")&&(constitutive_param_type!="rel_permeability")&&(constitutive_param_type!="electric_conductivity")&&(constitutive_param_type!="magnetic_conductivity"))
+    if ((constitutive_param_type!="rel_permittivity")&&(constitutive_param_type!="rel_permeability")&&(constitutive_param_type!="electric_conductivity")&&(constitutive_param_type!="magnetic_conductivity")&&(constitutive_param_type!="lorentz_delta_epsilon"))
 	{
 #ifdef __GNUG__
 //GNU C++ compiler is being used, use the nice predefined variables for the function name
@@ -94,7 +94,7 @@ void PlaceWMCorrRandomBlock
 		string func_name = "";
 #endif
 		throw AngoraInvalidArgumentExceptionWithType<string>(func_name,constitutive_param_type,
-			"(valid arguments are \"rel_permittivity\", \"rel_permeability\", \"electric_conductivity\", and \"magnetic_conductivity\")");
+			"(valid arguments are \"rel_permittivity\", \"rel_permeability\", \"electric_conductivity\", \"magnetic_conductivity\", and \"lorentz_delta_epsilon\")");
 	}
 
 	if (random_seed<0)
@@ -478,19 +478,14 @@ void PlaceWMCorrRandomBlock
 #endif
 	//name of the temporary file (for later use by all nodes when calling PlaceMaterialRegionFromFile)
 	string randfilename = randfile_template; //copy the filename into string (needed for PlaceMaterialRegionFromFile)
-
 #ifndef MPI_DISABLE
 	MPI_Barrier(MPI_CartSubComm);	//other nodes should wait until the master node finishes writing
 #endif
-
 	//all nodes should read random material region from file
 	PlaceMaterialRegionFromFile<RandMatType>(randfilename,BlockBack-1,BlockLeft-1,BlockLower-1,"BLL",constitutive_param_type,ANGORA_MAX_NEWMAT,shapeptr); //the coordinates of the "anchor" is 1 less than the cell indices of the back-left-lower cell
-
 #ifndef MPI_DISABLE
 	MPI_Barrier(MPI_CartSubComm);	//the file won't be closed (or deleted) until all nodes read from it
 #endif
-
-//cout << randfilename << endl;
 //double a;
 //cin >> a;
 

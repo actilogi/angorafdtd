@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -32,7 +32,7 @@ Copyright (C) 2006-2012  Ilker R. Capoglu
 #include "waveforms/Cwf_shared_ptr.h"
 
 //Uses TinyVector operations
-#include <blitz/tinyvec-et.h>
+#include <blitz/tinyvec2.h>
 
 //Use MPI if not disabled
 #ifndef MPI_DISABLE

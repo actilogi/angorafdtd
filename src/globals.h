@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -220,23 +220,51 @@ extern double c_lower;	//velocity of propagation in the lowermost layer (changed
 //Dispersion-related variables
 extern bool dispersion_exists;
 extern Array<bool,3> dispersion_exists_at_Ex_position,dispersion_exists_at_Ey_position,dispersion_exists_at_Ez_position;
-//Drude polarization current arrays
-//these correspond to 1/2*(1+kp)*dx times the actual current for efficiency
-//(Taflove&Hagness, 3rd ed. pg. 366, Eq. 9.58)
-extern Array<double,3> J_p_x,J_p_y,J_p_z;
-//update coefficients for the polarization current updates
-//Pa corresponds to k_p, Pb corresponds to 1/2*(1+kp)*dx times beta_p
-//(Taflove&Hagness, 3rd ed. pg. 366, Eq. 9.58)
-extern Array<update_coeff_type,3> Pa_X,Pb_X,Pa_Y,Pb_Y,Pa_Z,Pb_Z;
-//Drude pole frequency and relaxation time index arrays
-extern Array<omega_p_x_type,3> omega_p_x_indices;
-extern Array<omega_p_y_type,3> omega_p_y_indices;
-extern Array<omega_p_z_type,3> omega_p_z_indices;
-extern Array<tau_r_x_type,3> tau_r_x_indices;
-extern Array<tau_r_y_type,3> tau_r_y_indices;
-extern Array<tau_r_z_type,3> tau_r_z_indices;
-//distinct Drude pole frequency and relaxation time values
-extern Array<float,1> omega_p_x,omega_p_y,omega_p_z,tau_r_x,tau_r_y,tau_r_z;
+//Polarization current arrays
+// For Drude only:
+//  These correspond to 1/2*(1+kp)*dx times the actual current for efficiency
+//  (Taflove&Hagness, 3rd ed. pg. 366, Eq. 9.58)
+// For Lorentz:
+//  These correspond exactly to the definitions in Taflove&Hagness, 3rd ed.
+extern Array<double,4> J_p_x,J_p_y,J_p_z;
+//Polarization current arrays at previous time step
+// These are for Lorentz only.
+extern Array<double,4> Jm1_p_x,Jm1_p_y,Jm1_p_z;
+// E-field (at previous time step)
+// These are for Lorentz only.
+extern Array<double,3> Ex_m1,Ey_m1,Ez_m1;
+// Extra update coefficients for the E-field
+// These are for Lorentz only.
+extern Array<update_coeff_type,3> Cc_X,Cc_Y,Cc_Z;
+//Update coefficients for the polarization current updates (for Drude only)
+//  Pa corresponds to k_p, Pb corresponds to 1/2*(1+kp)*dx times beta_p
+//  (Taflove&Hagness, 3rd ed. pg. 366, Eq. 9.58)
+extern Array<update_coeff_type,4> Pa_X,Pb_X,Pa_Y,Pb_Y,Pa_Z,Pb_Z;
+//Update coefficients for the polarization current updates (for Lorentz)
+//  alpha, xi correspond to the definitions in
+//  Taflove&Hagness, 3rd ed. pg. 364.
+// gamma has an extra 1/(2*dt) term for efficiency.
+extern Array<update_coeff_type,4> alpha_X,xi_X,gamma_X,
+                                  alpha_Y,xi_Y,gamma_Y,
+                                  alpha_Z,xi_Z,gamma_Z;
+//Lorentz (pole frequency x sqrt(delta_eps))
+extern Array<omega_p_x_type,4> omega_p_x_indices;
+extern Array<omega_p_y_type,4> omega_p_y_indices;
+extern Array<omega_p_z_type,4> omega_p_z_indices;
+// For Drude: relaxation time
+// For Lorentz: inverse of damping factor delta_p
+extern Array<tau_p_x_type,4> tau_p_x_indices;
+extern Array<tau_p_y_type,4> tau_p_y_indices;
+extern Array<tau_p_z_type,4> tau_p_z_indices;
+// Both for Drude and Lorentz: pole frequency
+extern Array<Omega_p_x_type,4> Omega_p_x_indices;
+extern Array<Omega_p_y_type,4> Omega_p_y_indices;
+extern Array<Omega_p_z_type,4> Omega_p_z_indices;
+//distinct values for omega_p_*,tau_p_*,Omega_p_*:
+extern Array<float,1> omega_p_x,omega_p_y,omega_p_z,
+                      tau_p_x,tau_p_y,tau_p_z,
+                      Omega_p_x,Omega_p_y,Omega_p_z;
+extern int pole_dim_size;
 
 /******************************/
 /*	MULTIPLE-GRID VARIABLES   */

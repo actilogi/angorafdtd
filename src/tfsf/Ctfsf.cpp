@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -60,30 +60,30 @@ int Ctfsf::AddPlaneWave(const PWDataType& MyData)
 	}
 	else if (number_of_layers==2)
 	{//attach a 2-layered-medium plane-wave source
-		try {
-		boost::shared_ptr<Cpw> new_pw_ptr(new Cpw_2l(MyData));
-		PlaneWaves.push_back(new_pw_ptr);
-		}
-		catch (EvanescentPWException& evanpw)
-		{// catch exception if there is an evanescent PW in the lower layer
-			if (rank==0)
-			{
-				cout << evanpw.what() << endl;
-			}
+//		try {
+//		boost::shared_ptr<Cpw> new_pw_ptr(new Cpw_2l(MyData));
+//		PlaneWaves.push_back(new_pw_ptr);
+//		}
+//		catch (EvanescentPWException& evanpw)
+//		{// catch exception if there is an evanescent PW in the lower layer
+//			if (rank==0)
+//			{
+//				cout << evanpw.what() << endl;
+//			}
 			//insert a Cpw_ml object instead, since they can handle evanescent PWs
 			boost::shared_ptr<Cpw> new_pw_ptr(new Cpw_ml(MyData));
 			PlaneWaves.push_back(new_pw_ptr);
-		}
-		catch (LossyLayerException& lossexcp)
-		{// catch exception if there is a lossy layer
-			if (rank==0)
-			{
-				cout << lossexcp.what() << endl;
-			}
-			//insert a Cpw_ml object instead, since they can handle layers
-			boost::shared_ptr<Cpw> new_pw_ptr(new Cpw_ml(MyData));
-			PlaneWaves.push_back(new_pw_ptr);
-		}
+//		}
+//		catch (LossyLayerException& lossexcp)
+//		{// catch exception if there is a lossy layer
+//			if (rank==0)
+//			{
+//				cout << lossexcp.what() << endl;
+//			}
+//			//insert a Cpw_ml object instead, since they can handle layers
+//			boost::shared_ptr<Cpw> new_pw_ptr(new Cpw_ml(MyData));
+//			PlaneWaves.push_back(new_pw_ptr);
+//		}
 	}
 	else
 	{//attach a multilayered-medium plane-wave source

@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -56,6 +56,7 @@ bool dB_accuracy_set_in_configfile=false;		//is the dB accuracy fixed in the con
 #include "parallel.h"
 #include "init.h"
 #include "initgeom.h"
+#include "init_disp.h"
 #include "update.h"
 #include "time_axis.h"
 #include "path_utils.h"
@@ -372,6 +373,10 @@ int main(int argc, char *argv[])
 		Cmats Materials;
 		read_mat(Materials,fdtdconfig,validsettings);
 
+		//allocate and initialize the dispersion-related arrays,
+		//using the maximum number of Lorentz poles determined in read_mat
+		init_disp(Materials.max_eff_num_lrntz_poles());
+
 		///////*********************************************************************************************/
 		///////*********************************************************************************************/
 		///////************************        GEOMETRIC SHAPE  DEFINITIONS          ***********************/
@@ -532,7 +537,6 @@ int main(int argc, char *argv[])
 
 			//determine if there is dispersion in the grid
 			check_dispersion();
-
 			for (int n=0;n<NSTEPS;n++)
 			{
 				//use the current values, not the updated ones

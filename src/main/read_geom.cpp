@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -616,163 +616,157 @@ void read_geom(const Config& fdtdconfig, const Config& validsettings, const Csha
 						}
 					}
 				}
-	//			else if (geometry_setting_name=="SurfaceProfilesFromFiles")
-	//			{
-	//				//redundant, but robust and shorthand
-	//				Setting& Surffilelistsettings = read_list_from_group(Geometrysettings,geometry_setting_name);
-	//
-	//				int num_of_surffiles = Surffilelistsettings.getLength();
-	//				for (int surffileindex=0; surffileindex<num_of_surffiles; surffileindex++)
-	//				{
-	//					Setting& Surffilesettings = Surffilelistsettings[surffileindex];	//go to the surffileindex'th surface file setting
-	//					//check group for invalid settings
-	//					CheckAngoraGroupSetting(Surffilesettings,validsettings);
-	//
-	//					if (SettingEnabledForGrid(Surffilesettings))		//apply only if enabled for this grid
-	//					{
-	//						//read material file name
-	//						ostringstream surffilenamestream;
-	//						string SurfFilePath,SurfFileName,SurfFileExtension,SurfFullFileName;
-	//						//read path
-	//						read_optional_value_from_group<string>(Surffilesettings,"filepath",SurfFilePath);
-	//						//add slash to path if necessary
-	//						add_slash_to_path(SurfFilePath);
-	//						//if path is not absolute, prepend the base input path to get full path
-	//						if (!is_absolute_path(SurfFilePath))
-	//						{
-	//							surffilenamestream << InputDir;
-	//						}
-	//						surffilenamestream << SurfFilePath;
-	//
-	//						//read file name
-	//						read_value_from_group<string>(Surffilesettings,"filename",SurfFileName);
-	//
-	//						//add filename to string stream
-	//						surffilenamestream << SurfFileName;
-	//						bool append_run_index_to_name;
-	//						read_value_from_group<bool>(Surffilesettings,"append_run_index_to_name",append_run_index_to_name);
-	//						if (append_run_index_to_name)
-	//						{
-	//							surffilenamestream << GridIndex;
-	//						}
-	//						if (!read_optional_value_from_group<string>(Surffilesettings,"fileextension",SurfFileExtension))
-	//						{
-	//							SurfFileExtension = "surf";
-	//						}
-	//						//append file extension
-	//						surffilenamestream << "." << SurfFileExtension;
-	//						//get string from string stream
-	//						SurfFullFileName = surffilenamestream.str();
-	//
-	//						//read the filling material
-	//						string material_tag;
-	//						read_value_from_group<string>(Surffilesettings,"material_tag",material_tag);
-	//
-	//						MaterialId mat_id = Materials[material_tag];
-	//
-	//						int position_x,position_y,position_z;	// x, y and z positions of the dielectric slab
-	//						read_value_from_group<int>(Surffilesettings,"position_x",position_x);
-	//						read_value_from_group<int>(Surffilesettings,"position_y",position_y);
-	//						read_value_from_group<int>(Surffilesettings,"position_z",position_z);
-	//
-	//						//the position is relative to the grid origin
-	//						position_x += OriginX;
-	//						position_y += OriginY;
-	//						position_z += OriginZ;
-	//
-	//						//read the anchor (reference point for position_y,position_z) for the profiled material block
-	//						string anchor;
-	//						if (!read_optional_value_from_group<string>(Surffilesettings,"anchor",anchor))
-	//						{
-	//							anchor = "center";
-	//						}
-	//
-	//						//If not in check mode, add profiled material block to grid
-	//						if (!check_mode)
-	//						{
-	//							PlaceSurfaceProfileFromFile(SurfFullFileName,mat_id,position_x,position_y,position_z,anchor);
-	//						}
-	//					}
-	//				}
-	//			}
-	//			else if (geometry_setting_name=="SurfaceEngravingProfilesFromFiles")
-	//			{
-	//				//redundant, but robust and shorthand
-	//				Setting& Surfengrfilelistsettings = read_list_from_group(Geometrysettings,geometry_setting_name);
-	//
-	//				int num_of_surfengrfiles = Surfengrfilelistsettings.getLength();
-	//				for (int surfengrfileindex=0; surfengrfileindex<num_of_surfengrfiles; surfengrfileindex++)
-	//				{
-	//					Setting& Surfengrfilesettings = Surfengrfilelistsettings[surfengrfileindex];	//go to the surfengrfileindex'th surface file setting
-	//					//check group for invalid settings
-	//					CheckAngoraGroupSetting(Surfengrfilesettings,validsettings);
-	//
-	//					if (SettingEnabledForGrid(Surfengrfilesettings))	//apply only if enabled for this grid
-	//					{
-	//						//read surface-engraving file name
-	//						ostringstream surfengrfilenamestream;
-	//						string SurfEngrFilePath,SurfEngrFileName,SurfEngrFileExtension,SurfEngrFullFileName;
-	//						//read path
-	//						read_optional_value_from_group<string>(Surfengrfilesettings,"filepath",SurfEngrFilePath);
-	//						//add slash to path if necessary
-	//						add_slash_to_path(SurfEngrFilePath);
-	//						//if path is not absolute, prepend the base input path to get full path
-	//						if (!is_absolute_path(SurfEngrFilePath))
-	//						{
-	//							surfengrfilenamestream << InputDir;
-	//						}
-	//						surfengrfilenamestream << SurfEngrFilePath;
-	//
-	//						//read file name
-	//						read_value_from_group<string>(Surfengrfilesettings,"filename",SurfEngrFileName);
-	//						//add filename to string stream
-	//						surfengrfilenamestream << SurfEngrFileName;
-	//						bool append_run_index_to_name;
-	//						read_value_from_group<bool>(Surfengrfilesettings,"append_run_index_to_name",append_run_index_to_name);
-	//						if (append_run_index_to_name)
-	//						{
-	//							surfengrfilenamestream << GridIndex;
-	//						}
-	//						if (!read_optional_value_from_group<string>(Surfengrfilesettings,"fileextension",SurfEngrFileExtension))
-	//						{
-	//							SurfEngrFileExtension = "surf";
-	//						}
-	//						//append file extension
-	//						surfengrfilenamestream << "." << SurfEngrFileExtension;
-	//						//get string from string stream
-	//						SurfEngrFullFileName = surfengrfilenamestream.str();
-	//
-	//						//read the filling material
-	//						string material_tag;
-	//						read_value_from_group<string>(Surfengrfilesettings,"material_tag",material_tag);
-	//
-	//						MaterialId mat_id = Materials[material_tag];
-	//
-	//						int position_x,position_y,position_z;	// x, y and z positions of the dielectric slab
-	//						read_value_from_group<int>(Surfengrfilesettings,"position_x",position_x);
-	//						read_value_from_group<int>(Surfengrfilesettings,"position_y",position_y);
-	//						read_value_from_group<int>(Surfengrfilesettings,"position_z",position_z);
-	//
-	//						//the position is relative to the grid origin
-	//						position_x += OriginX;
-	//						position_y += OriginY;
-	//						position_z += OriginZ;
-	//
-	//						//read the anchor (reference point for position_y,position_z) for the profiled material block
-	//						string anchor;
-	//						if (!read_optional_value_from_group<string>(Surfengrfilesettings,"anchor",anchor))
-	//						{
-	//							anchor = "center";
-	//						}
-	//
-	//						//If not in check mode, add profiled material block to grid
-	//						if (!check_mode)
-	//						{
-	//							PlaceSurfaceEngravingProfileFromFile(SurfEngrFullFileName,mat_id,position_x,position_y,position_z,anchor);
-	//						}
-	//					}
-	//				}
-	//			}
+//				else if (geometry_setting_name=="SurfaceProfilesFromFiles")
+//				{
+//					//redundant, but robust and shorthand
+//					Setting& Surffilelistsettings = read_list_from_group(Geometrysettings,geometry_setting_name);
+//
+//					int num_of_surffiles = Surffilelistsettings.getLength();
+//					for (int surffileindex=0; surffileindex<num_of_surffiles; surffileindex++)
+//					{
+//						Setting& Surffilesettings = Surffilelistsettings[surffileindex];	//go to the surffileindex'th surface file setting
+//						//check group for invalid settings
+//						CheckAngoraGroupSetting(Surffilesettings,validsettings);
+//
+//						if (SettingEnabledForGrid(Surffilesettings))		//apply only if enabled for this grid
+//						{
+//							//read material file name
+//							ostringstream surffilenamestream;
+//							string SurfFilePath,SurfFileName,SurfFileExtension,SurfFullFileName;
+//							//read path
+//							read_optional_value_from_group<string>(Surffilesettings,"filepath",SurfFilePath);
+//							//add slash to path if necessary
+//							add_slash_to_path(SurfFilePath);
+//							//if path is not absolute, prepend the base input path to get full path
+//							if (!is_absolute_path(SurfFilePath))
+//							{
+//								surffilenamestream << InputDir;
+//							}
+//							surffilenamestream << SurfFilePath;
+//
+//							//read file name
+//							read_value_from_group<string>(Surffilesettings,"filename",SurfFileName);
+//
+//							//add filename to string stream
+//							surffilenamestream << SurfFileName;
+//							bool append_run_index_to_name;
+//							read_value_from_group<bool>(Surffilesettings,"append_run_index_to_name",append_run_index_to_name);
+//							if (append_run_index_to_name)
+//							{
+//								surffilenamestream << GridIndex;
+//							}
+//							if (!read_optional_value_from_group<string>(Surffilesettings,"fileextension",SurfFileExtension))
+//							{
+//								SurfFileExtension = "surf";
+//							}
+//							//append file extension
+//							surffilenamestream << "." << SurfFileExtension;
+//							//get string from string stream
+//							SurfFullFileName = surffilenamestream.str();
+//
+//							//read the filling material
+//							string material_tag;
+//							read_value_from_group<string>(Surffilesettings,"material_tag",material_tag);
+//
+//							MaterialId mat_id = Materials[material_tag];
+//
+//							int position_x,position_y,position_z;	// x, y and z positions of the dielectric slab
+//							read_value_from_group<int>(Surffilesettings,"position_x",position_x);
+//							read_value_from_group<int>(Surffilesettings,"position_y",position_y);
+//							read_value_from_group<int>(Surffilesettings,"position_z",position_z);
+//
+//							//the position is relative to the grid origin
+//							position_x += OriginX;
+//							position_y += OriginY;
+//							position_z += OriginZ;
+//
+//							//read the anchor (reference point for position_y,position_z) for the profiled material block
+//							string anchor;
+//							if (!read_optional_value_from_group<string>(Surffilesettings,"anchor",anchor))
+//							{
+//								anchor = "center";
+//							}
+//
+//							//If not in check mode, add profiled material block to grid
+//							if (!check_mode)
+//							{
+//								PlaceSurfaceProfileFromFile(SurfFullFileName,mat_id,position_x,position_y,position_z,anchor);
+//							}
+//						}
+//					}
+//				}
+				else if (geometry_setting_name=="SurfaceEngravingProfilesFromFiles")
+				{
+					//redundant, but robust and shorthand
+					Setting& Surfengrfilelistsettings = read_list_from_group(Geometrysettings,geometry_setting_name);
+
+					int num_of_surfengrfiles = Surfengrfilelistsettings.getLength();
+					for (int surfengrfileindex=0; surfengrfileindex<num_of_surfengrfiles; surfengrfileindex++)
+					{
+						Setting& Surfengrfilesettings = Surfengrfilelistsettings[surfengrfileindex];	//go to the surfengrfileindex'th surface file setting
+						//check group for invalid settings
+						CheckAngoraGroupSetting(Surfengrfilesettings,validsettings);
+
+						if (SettingEnabledForGrid(Surfengrfilesettings))	//apply only if enabled for this grid
+						{
+							//read surface-engraving file name
+							ostringstream surfengrfilenamestream;
+							string SurfEngrFilePath,SurfEngrFileName,SurfEngrFileExtension,SurfEngrFullFileName;
+							//read path
+							read_optional_value_from_group<string>(Surfengrfilesettings,"filepath",SurfEngrFilePath);
+							//add slash to path if necessary
+							add_slash_to_path(SurfEngrFilePath);
+							//if path is not absolute, prepend the base input path to get full path
+							if (!is_absolute_path(SurfEngrFilePath))
+							{
+								surfengrfilenamestream << InputDir;
+							}
+							surfengrfilenamestream << SurfEngrFilePath;
+
+							//read file name
+							read_value_from_group<string>(Surfengrfilesettings,"filename",SurfEngrFileName);
+							//add filename to string stream
+							surfengrfilenamestream << SurfEngrFileName;
+							bool append_run_index_to_name;
+							read_value_from_group<bool>(Surfengrfilesettings,"append_run_index_to_name",append_run_index_to_name);
+							if (append_run_index_to_name)
+							{
+								surfengrfilenamestream << GridIndex;
+							}
+							if (!read_optional_value_from_group<string>(Surfengrfilesettings,"fileextension",SurfEngrFileExtension))
+							{
+								SurfEngrFileExtension = "surf";
+							}
+							//append file extension
+							surfengrfilenamestream << "." << SurfEngrFileExtension;
+							//get string from string stream
+							SurfEngrFullFileName = surfengrfilenamestream.str();
+
+							int position_x,position_y,position_z;	// x, y and z positions of the dielectric slab
+							read_value_from_group<int>(Surfengrfilesettings,"position_x",position_x);
+							read_value_from_group<int>(Surfengrfilesettings,"position_y",position_y);
+							read_value_from_group<int>(Surfengrfilesettings,"position_z",position_z);
+
+							//the position is relative to the grid origin
+							position_x += OriginX;
+							position_y += OriginY;
+							position_z += OriginZ;
+
+							//read the anchor (reference point for position_y,position_z) for the profiled material block
+							string anchor;
+							if (!read_optional_value_from_group<string>(Surfengrfilesettings,"anchor",anchor))
+							{
+								anchor = "center";
+							}
+
+							//If not in check mode, add profiled material block to grid
+							if (!check_mode)
+							{
+								PlaceSurfaceEngravingProfileFromFile(SurfEngrFullFileName,position_x,position_y,position_z,anchor);
+							}
+						}
+					}
+				}
 	//			else if (geometry_setting_name=="PECMasksFromFiles")
 	//			{
 	//				//redundant, but robust and shorthand

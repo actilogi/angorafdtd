@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -218,20 +218,27 @@ double c_lower;	//velocity of propagation in the lowermost layer (changed only t
 //Dispersion-related variables
 bool dispersion_exists;
 Array<bool,3> dispersion_exists_at_Ex_position,dispersion_exists_at_Ey_position,dispersion_exists_at_Ez_position;
-//Drude polarization current arrays
-Array<double,3> J_p_x,J_p_y,J_p_z;
-//update coefficients for the polarization current updates
-//Pa corresponds to k_p, Pb corresponds to beta_p (Taflove&Hagness, 3rd ed., pg. 366)
-Array<update_coeff_type,3> Pa_X,Pb_X,Pa_Y,Pb_Y,Pa_Z,Pb_Z;
-//Drude pole frequency and relaxation time index arrays
-Array<omega_p_x_type,3> omega_p_x_indices;
-Array<omega_p_y_type,3> omega_p_y_indices;
-Array<omega_p_z_type,3> omega_p_z_indices;
-Array<tau_r_x_type,3> tau_r_x_indices;
-Array<tau_r_y_type,3> tau_r_y_indices;
-Array<tau_r_z_type,3> tau_r_z_indices;
-//distinct Drude pole frequency and relaxation time values
-Array<float,1> omega_p_x,omega_p_y,omega_p_z,tau_r_x,tau_r_y,tau_r_z;
+Array<double,4> J_p_x,J_p_y,J_p_z;
+Array<double,4> Jm1_p_x,Jm1_p_y,Jm1_p_z;
+Array<double,3> Ex_m1,Ey_m1,Ez_m1;
+Array<update_coeff_type,3> Cc_X,Cc_Y,Cc_Z;
+Array<update_coeff_type,4> Pa_X,Pb_X,Pa_Y,Pb_Y,Pa_Z,Pb_Z;
+Array<update_coeff_type,4> alpha_X,xi_X,gamma_X,
+                           alpha_Y,xi_Y,gamma_Y,
+                           alpha_Z,xi_Z,gamma_Z;
+Array<omega_p_x_type,4> omega_p_x_indices;
+Array<omega_p_y_type,4> omega_p_y_indices;
+Array<omega_p_z_type,4> omega_p_z_indices;
+Array<tau_p_x_type,4> tau_p_x_indices;
+Array<tau_p_y_type,4> tau_p_y_indices;
+Array<tau_p_z_type,4> tau_p_z_indices;
+Array<Omega_p_x_type,4> Omega_p_x_indices;
+Array<Omega_p_y_type,4> Omega_p_y_indices;
+Array<Omega_p_z_type,4> Omega_p_z_indices;
+Array<float,1> omega_p_x,omega_p_y,omega_p_z,
+                      tau_p_x,tau_p_y,tau_p_z,
+                      Omega_p_x,Omega_p_y,Omega_p_z;
+int pole_dim_size;
 
 /******************************/
 /*	MULTIPLE-GRID VARIABLES   */

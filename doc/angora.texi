@@ -1111,7 +1111,19 @@ In this example, two materials are defined in two respective unnamed groups; onl
 This string variable assigns a @emph{name} to the particular material, so it can be referred to later in the configuration file.
 @end deftypevr
 @deftypevr {Sub-variable of Materials} floating-point rel_permittivity (default: @code{1.0})
-This variable specifies the relative permittivity (or the dielectric constant) of the material. In SI units, the absolute permittivity of the material is this variable multiplied by the permittivity of free space (8.85418782E-12 F/m).
+This variable specifies the relative permittivity (or the dielectric constant) of the material. In SI units, the absolute permittivity of the material is this variable multiplied by the permittivity of free space (8.85418782E-12 F/m). If there is dispersion, this parameter defines
+@tex
+$
+\epsilon_{r_\infty}
+$
+@end tex
+
+@ifnottex
+eps_r_inf
+@end ifnottex
+
+(see @ref{Drude Dispersion}).
+
 @end deftypevr
 @deftypevr {Sub-variable of Materials} floating-point rel_permeability (default: @code{1.0})
 This variable specifies the relative permeability (or the magnetic constant) of the material. In SI units, the absolute permeability of the material is this variable multiplied by the permeability of free space (4piE-7).
@@ -1179,7 +1191,7 @@ $
 @ifnottex
 tau_p
 @end ifnottex
-is the Drude pole relaxation time of the material.
+is the Drude pole relaxation time of the material. 
 
 Currently, Drude dispersion @emph{cannot} be used for materials extending into the PML (see @ref{Perfectly-Matched Layer (PML)}). Consequently, the plane-wave injector (see @ref{Plane Waves}) and the near-field-to-far-field transformer (see @ref{Near-Field-to-Far-Field Transformer}) @emph{cannot} handle planar layers with Drude dispersion. This feature may be added in the future.
 

@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -66,4 +66,17 @@ void Cmats::CreateMaterial(const Cmat& material, const string& material_tag)
 	{//string tag already exists, throw exception
 		throw NamedMaterialExistsException(material_tag);
 	}
+}
+
+//Maximum effective number of poles among all materials
+//"Effective" means that the pole frequency is nonzero
+int Cmats::max_eff_num_lrntz_poles() const {
+	int max_num_poles(0),num_poles;
+	for (map<string,Cmat>::const_iterator map_it(NamedMaterials.begin());
+	     map_it!=NamedMaterials.end(); ++map_it) {
+		num_poles = map_it->second.eff_num_lrntz_poles();
+		if (num_poles>max_num_poles)
+		  max_num_poles=num_poles;
+	}
+	return max_num_poles;
 }

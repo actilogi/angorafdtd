@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -52,7 +52,6 @@ extern void MPI_exit(const int& exitcode);
 Ctr_pd::Ctr_pd(const TrDataType_pd& MyData, const string& FileName, const int& Index)
 		: Data(MyData), FarFieldFileName(FileName), TransformerIndex(Index)
 {
-
     if ((Data.directionspec!="theta-phi")&&(Data.directionspec!="dircosx-dircosy-upper")&&(Data.directionspec!="dircosx-dircosy-lower"))
     {
         if (rank==0)

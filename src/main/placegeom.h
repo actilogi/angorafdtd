@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -19,6 +19,12 @@ Copyright (C) 2006-2012  Ilker R. Capoglu
 
 #ifndef PLACEGEOM_H
 #define PLACEGEOM_H
+
+#ifndef ANGORA_MAX_NEWMAT
+#define ANGORA_MAX_NEWMAT 1000
+#endif
+
+
 
 class Cmat;
 
@@ -56,10 +62,9 @@ void PlaceGround(const int& GroundCoord);//Places PEC ground plane
 //			const string& SurfaceProfileFileName,
 //			const MaterialId& MaterialIdentifier,
 //			const int& xPos, const int& yPos, const int& zPos, const string& anchor);
-//void PlaceSurfaceEngravingProfileFromFile(//Reads a rectangular array specifying an engraving profile
-//			const string& SurfaceEngravingProfileFileName,
-//			const MaterialId& MaterialIdentifier,
-//			const int& xPos, const int& yPos, const int& zPos, const string& anchor);
+void PlaceSurfaceEngravingProfileFromFile(//Reads a rectangular array specifying an engraving profile
+			const string& SurfaceEngravingProfileFileName,
+			const int& xPos, const int& yPos, const int& zPos, const string& anchor);
 
 /** these functions should eventually be removed (their job should be done by PlaceSlab, AddMaterial and similar functions) **/
 void analyze_layering();

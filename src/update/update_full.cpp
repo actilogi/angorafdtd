@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -25,17 +25,18 @@ Copyright (C) 2006-2012  Ilker R. Capoglu
 extern double dx;
 /** REMOVE LATER **/
 
-extern Array<double,3> Ex,Ey,Ez;
+extern Array<double,3> Ex,Ey,Ez,Ex_m1,Ey_m1,Ez_m1;
 extern Array<double,3> Hx,Hy,Hz;
 
-extern Array<update_coeff_type,3> Ca_X,Cb_X,Ca_Y,Cb_Y,Ca_Z,Cb_Z;
+extern Array<update_coeff_type,3> Ca_X,Cb_X,Cc_X,Ca_Y,Cb_Y,Cc_Y,Ca_Z,Cb_Z,Cc_Z;
 extern Array<update_coeff_type,3> Da_X,Db_X,Da_Y,Db_Y,Da_Z,Db_Z;
 
 extern Array<double,1> inv_kappa_e_x,inv_kappa_e_y,inv_kappa_e_z,inv_kappa_h_x,inv_kappa_h_y,inv_kappa_h_z;
 
 extern Array<bool,3> dispersion_exists_at_Ex_position,dispersion_exists_at_Ey_position,dispersion_exists_at_Ez_position;
-extern Array<double,3> J_p_x,J_p_y,J_p_z;
-extern Array<update_coeff_type,3> Pa_X,Pb_X,Pa_Y,Pb_Y,Pa_Z,Pb_Z;
+extern Array<double,4> J_p_x,J_p_y,J_p_z,Jm1_p_x,Jm1_p_y,Jm1_p_z;
+extern Array<update_coeff_type,4> alpha_X,xi_X,gamma_X,alpha_Y,xi_Y,gamma_Y,alpha_Z,xi_Z,gamma_Z;
+extern int pole_dim_size;
 
 extern int Ex_min_index_in_x,Ex_max_index_in_x,Ex_min_index_in_y,Ex_max_index_in_y,Ex_min_index_in_z,Ex_max_index_in_z;
 extern int Ey_min_index_in_x,Ey_max_index_in_x,Ey_min_index_in_y,Ey_max_index_in_y,Ey_min_index_in_z,Ey_max_index_in_z;
@@ -48,7 +49,11 @@ namespace{
 	int i,j,k;
 //	bool dispersion_exists_here;
 	double E_old;
-	double *E_new,*H_new;
+	double *E_new,*H_new,*Em1;
+	double jp_old;
+	double *jp,*jm1;
+	double jsum;
+	update_coeff_type *alpha_p_x,*xi_p_x,*gamma_p_x,*alpha_p_y,*xi_p_y,*gamma_p_y,*alpha_p_z,*xi_p_z,*gamma_p_z;
 };
 
 
@@ -62,17 +67,43 @@ void updateE_full(const int& n)
 			{
 				if (dispersion_exists_at_Ex_position(i,j,k))
 				{
+					/** 1. COMPUTE THE Jx POLARIZATION CONTRIB **/
+					jsum=0;
+                    jp = &(J_p_x(i,j,k,0));
+                    jm1 = &(Jm1_p_x(i,j,k,0));
+                    alpha_p_x = &(alpha_X(i,j,k,0));
+                    xi_p_x = &(xi_X(i,j,k,0));
+                    for (int p(0); p<pole_dim_size;
+                        ++jp, ++jm1, ++alpha_p_x, ++xi_p_x, ++p) {
+                            jsum += 0.5*dx*((1+(*alpha_p_x))*(*jp)+(*xi_p_x)*(*jm1));
+                    }
+					/** 2. DO ELECTRIC FIELD UPDATE **/
 					E_new=&(Ex(i,j,k));
 					E_old=(*E_new);
+                    Em1 = &(Ex_m1(i,j,k));
 					(*E_new)=Ca_X(i,j,k)*E_old
 						+ Cb_X(i,j,k)*
 						((Hz(i,j,k)-Hz(i,j-1,k))*inv_kappa_e_y(j)
 						+(Hy(i,j,k-1)-Hy(i,j,k))*inv_kappa_e_z(k)
-					/** 1. ADD THE Jx POLARIZATION CONTRIB **/
-						-J_p_x(i,j,k));
-					/** 2. DO THE Jx UPDATE USING E_old and E_new **/
-					J_p_x(i,j,k)=Pa_X(i,j,k)*J_p_x(i,j,k)+Pb_X(i,j,k)*((*E_new)+E_old);
-				}
+					/** 3. ADD THE Jx POLARIZATION CONTRIB **/
+					    -jsum)
+					/** 3.b. ADD THE Ex^(n-1) CONTRIB **/
+					    + Cc_X(i,j,k)*(*Em1);
+					/** 4. DO THE Jx UPDATE USING E_old and E_new **/
+                    jp = &(J_p_x(i,j,k,0));
+                    // Assign reference
+                    jm1 = &(Jm1_p_x(i,j,k,0));
+                    alpha_p_x = &(alpha_X(i,j,k,0));
+                    xi_p_x = &(xi_X(i,j,k,0));
+                    gamma_p_x = &(gamma_X(i,j,k,0));
+                    for (int p(0); p<pole_dim_size;
+                        ++jp, ++jm1, ++alpha_p_x, ++xi_p_x, ++gamma_p_x, ++p) {
+                        jp_old = (*jp);
+                        (*jp)=(*alpha_p_x)*jp_old+(*xi_p_x)*(*jm1)+(*gamma_p_x)*((*E_new)-(*Em1));
+                        *jm1 = jp_old;
+                    }
+                    *Em1 = E_old;
+                }
 				else
 				{
 					E_new=&(Ex(i,j,k));
@@ -91,16 +122,42 @@ void updateE_full(const int& n)
 			{
 				if (dispersion_exists_at_Ey_position(i,j,k))
 				{
+					/** 1. COMPUTE THE Jx POLARIZATION CONTRIB **/
+					jsum=0;
+                    jp = &(J_p_y(i,j,k,0));
+                    jm1 = &(Jm1_p_y(i,j,k,0));
+                    alpha_p_y = &(alpha_Y(i,j,k,0));
+                    xi_p_y = &(xi_Y(i,j,k,0));
+                    for (int p(0); p<pole_dim_size;
+                       ++jp, ++jm1, ++alpha_p_y, ++xi_p_y, ++p) {
+                    jsum += 0.5*dx*((1+(*alpha_p_y))*(*jp)+(*xi_p_y)*(*jm1));
+                    }
+					/** 2. DO ELECTRIC FIELD UPDATE **/
 					E_new=&(Ey(i,j,k));
 					E_old=(*E_new);
+					Em1 = &(Ey_m1(i,j,k));
 					(*E_new)=Ca_Y(i,j,k)*E_old
 						+ Cb_Y(i,j,k)*
 						((Hx(i,j,k)-Hx(i,j,k-1))*inv_kappa_e_z(k)
 						+(Hz(i-1,j,k)-Hz(i,j,k))*inv_kappa_e_x(i)
-					/** 1. ADD THE Jy POLARIZATION CONTRIB **/
-						-J_p_y(i,j,k));
-					/** 2. DO THE Jy UPDATE USING E_old and E_new **/
-					J_p_y(i,j,k)=Pa_Y(i,j,k)*J_p_y(i,j,k)+Pb_Y(i,j,k)*((*E_new)+E_old);
+					/** 3. ADD THE Jy POLARIZATION CONTRIB **/
+					    -jsum)
+          /** 3.b. ADD THE Ex^(n-1) CONTRIB **/
+					    +Cc_Y(i,j,k)*(*Em1);
+					/** 4. DO THE Jy UPDATE USING E_old and E_new **/
+                    jp = &(J_p_y(i,j,k,0));
+                    // Assign reference
+                    jm1 = &(Jm1_p_y(i,j,k,0));
+                    alpha_p_y = &(alpha_Y(i,j,k,0));
+                    xi_p_y = &(xi_Y(i,j,k,0));
+                    gamma_p_y = &(gamma_Y(i,j,k,0));
+                    for (int p(0); p<pole_dim_size;
+                        ++jp, ++jm1, ++alpha_p_y, ++xi_p_y, ++gamma_p_y, ++p) {
+                    jp_old = (*jp);
+                    (*jp)=(*alpha_p_y)*jp_old+(*xi_p_y)*(*jm1)+(*gamma_p_y)*((*E_new)-(*Em1));
+                    *jm1 = jp_old;
+                    }
+                    *Em1 = E_old;
 				}
 				else
 				{
@@ -113,7 +170,6 @@ void updateE_full(const int& n)
 			}
 		}
 	}
-
 	//Update Ez
 	for (i=Ez_min_index_in_x; i<=Ez_max_index_in_x; i++){
 		for (j=Ez_min_index_in_y; j<=Ez_max_index_in_y; j++){
@@ -121,16 +177,42 @@ void updateE_full(const int& n)
 			{
 				if (dispersion_exists_at_Ez_position(i,j,k))
 				{
+					/** 1. COMPUTE THE Jx POLARIZATION CONTRIB **/
+					jsum=0;
+                    jp = &(J_p_z(i,j,k,0));
+                    jm1 = &(Jm1_p_z(i,j,k,0));
+                    alpha_p_z = &(alpha_Z(i,j,k,0));
+                    xi_p_z = &(xi_Z(i,j,k,0));
+                    for (int p(0); p<pole_dim_size;
+                         ++jp, ++jm1, ++alpha_p_z, ++xi_p_z, ++p) {
+                    jsum += 0.5*dx*((1+(*alpha_p_z))*(*jp)+(*xi_p_z)*(*jm1));
+                    }
+					/** 2. DO ELECTRIC FIELD UPDATE **/
 					E_new=&(Ez(i,j,k));
 					E_old=(*E_new);
+					Em1 = &(Ez_m1(i,j,k));
 					(*E_new)=Ca_Z(i,j,k)*E_old
 						+ Cb_Z(i,j,k)*
 						((Hy(i,j,k)-Hy(i-1,j,k))*inv_kappa_e_x(i)
 							+(Hx(i,j-1,k)-Hx(i,j,k))*inv_kappa_e_y(j)
-					/** 1. ADD THE Jz POLARIZATION CONTRIB **/
-						-J_p_z(i,j,k));
-					/** 2. DO THE Jz UPDATE USING E_old and E_new **/
-					J_p_z(i,j,k)=Pa_Z(i,j,k)*J_p_z(i,j,k)+Pb_Z(i,j,k)*((*E_new)+E_old);
+					/** 3. ADD THE Jz POLARIZATION CONTRIB **/
+					    -jsum)
+                    /** 3.b. ADD THE Ex^(n-1) CONTRIB **/
+					    + Cc_Y(i,j,k)*(*Em1);
+                            /** 4. DO THE Jz UPDATE USING E_old and E_new **/
+                    jp = &(J_p_z(i,j,k,0));
+                    // Assign reference
+                    jm1 = &(Jm1_p_z(i,j,k,0));
+                    alpha_p_z = &(alpha_Z(i,j,k,0));
+                    xi_p_z = &(xi_Z(i,j,k,0));
+                    gamma_p_z = &(gamma_Z(i,j,k,0));
+                    for (int p(0); p<pole_dim_size;
+                         ++jp, ++jm1, ++alpha_p_z, ++xi_p_z, ++gamma_p_z, ++p) {
+                    jp_old = (*jp);
+                    (*jp)=(*alpha_p_z)*jp_old+(*xi_p_z)*(*jm1)+(*gamma_p_z)*((*E_new)-(*Em1));
+                    *jm1 = jp_old;
+                    }
+                    *Em1 = E_old;
 				}
 				else
 				{

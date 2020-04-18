@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -104,31 +104,124 @@ void read_mat(Cmats &Materials, const Config& fdtdconfig, const Config& validset
 					NewMaterial.set_cond_h(magnetic_conductivity);
 				}
 
-				float drude_pole_frequency;
-				if (!read_optional_value_from_group<float>(Newmaterialsettings,"drude_pole_frequency",drude_pole_frequency))
-				{
-					if (!transparent)
-					{
-						NewMaterial.set_omega_p(0); //default: omega_p = 0
-					}
-				}
-				else
-				{
-					NewMaterial.set_omega_p(drude_pole_frequency);
-				}
+        /********************************/
+        /***     READ DRUDE POLES     ***/
+        /********************************/
+        bool dpf_exists(Newmaterialsettings.exists("drude_pole_frequency")),
+             drt_exists(Newmaterialsettings.exists("drude_pole_relaxation_time"));
+        //either all should exist or neither
+        if (dpf_exists^drt_exists) {
+          throw AngoraSettingException(Newmaterialsettings,
+            "drude_pole_frequency and drude_pole_relaxation_time should both be specified");
+        }
+        if (dpf_exists&&drt_exists) {
+          Setting& dpf = Newmaterialsettings["drude_pole_frequency"];
+          Setting& drt = Newmaterialsettings["drude_pole_relaxation_time"];
+          if (dpf.isNumber()&&drt.isNumber()) {
+            float drude_pole_frequency(dpf),drude_pole_relaxation_time(drt);
+            NewMaterial.add_drude_pole(drude_pole_frequency,drude_pole_relaxation_time);
+          }
+          else if (dpf.isArray()&&drt.isArray()) {
+            int numpoles(dpf.getLength());
+            if (numpoles!=drt.getLength()) {
+              throw AngoraSettingException(Newmaterialsettings,
+                    "drude_pole_frequency and drude_pole_relaxation_time should have "
+                    "the same number of elements");
+            }
+            else {
+              if ((!dpf[0].isNumber())||(!drt[0].isNumber())) {
+                throw AngoraSettingException(Newmaterialsettings,
+                "drude_pole_frequency and drude_pole_relaxation_time should be "
+                "arrays of numbers");
+              }
+              else {
+                for (int p(0); p<numpoles; ++p) {
+                  float drude_pole_frequency(dpf[p]),drude_pole_relaxation_time(drt[p]);
+                  NewMaterial.add_drude_pole(drude_pole_frequency,drude_pole_relaxation_time);
+                }
+              }
+            }
+          }
+          else {
+            throw AngoraSettingException(Newmaterialsettings,
+            "drude_pole_frequency and drude_pole_relaxation_time should both be "
+            "numbers or arrays of numbers");
+          }
+        }
+        else {
+          if (!transparent) {
+            NewMaterial.add_drude_pole(0.0,0.0);
+          }
+        }
 
-				float drude_pole_relaxation_time;
-				if (!read_optional_value_from_group<float>(Newmaterialsettings,"drude_pole_relaxation_time",drude_pole_relaxation_time))
-				{
-					if (!transparent)
-					{
-						NewMaterial.set_tau_r(0); //default: tau_r = 0
-					}
-				}
-				else
-				{
-					NewMaterial.set_tau_r(drude_pole_relaxation_time);
-				}
+        /********************************/
+        /***     READ LORENTZ POLES     ***/
+        /********************************/
+        bool lpf_exists(Newmaterialsettings.exists("lorentz_pole_frequency")),
+             ldf_exists(Newmaterialsettings.exists("lorentz_pole_damping_factor")),
+             lde_exists(Newmaterialsettings.exists("lorentz_delta_epsilon"));
+        //either all should exist or neither
+        if (!((lpf_exists&&ldf_exists&&lde_exists)||(!lpf_exists&&!ldf_exists&&!lde_exists))) {
+          throw AngoraSettingException(Newmaterialsettings,
+            "lorentz_pole_frequency, lorentz_pole_damping_factor, and lorentz_delta_epsilon "
+            "should all be specified");
+        }
+        if (lpf_exists&&ldf_exists&&lde_exists) {
+          Setting& lpf = Newmaterialsettings["lorentz_pole_frequency"];
+          Setting& ldf = Newmaterialsettings["lorentz_pole_damping_factor"];
+          Setting& lde = Newmaterialsettings["lorentz_delta_epsilon"];
+          if (lpf.isNumber()&&ldf.isNumber()&&lde.isNumber()) {
+            float lorentz_pole_frequency(lpf),lorentz_pole_damping_factor(ldf),
+                  lorentz_delta_epsilon(lde);
+            if (lorentz_pole_damping_factor==0.0)
+              throw AngoraSettingException(Newmaterialsettings,
+                    "lorentz_pole_damping_factor cannot be zero");
+            NewMaterial.add_lorentz_pole(lorentz_pole_frequency,
+                                        lorentz_pole_damping_factor,
+                                        lorentz_delta_epsilon);
+          }
+          else if (lpf.isArray()&&ldf.isArray()&&lde.isArray()) {
+            int numpoles(lpf.getLength());
+            if (numpoles!=ldf.getLength()||numpoles!=lde.getLength()) {
+              throw AngoraSettingException(Newmaterialsettings,
+                    "lorentz_pole_frequency, lorentz_pole_damping_factor, and "
+                    "lorentz_delta_epsilon should have "
+                    "the same number of elements");
+            }
+            else {
+              if ((!lpf[0].isNumber())||(!ldf[0].isNumber())||(!lde[0].isNumber())) {
+                throw AngoraSettingException(Newmaterialsettings,
+                "lorentz_pole_frequency, lorentz_pole_damping_factor, and "
+                "lorentz_delta_epsilon should be arrays of numbers");
+              }
+              else {
+                for (int p(0); p<numpoles; ++p) {
+                  float lorentz_pole_frequency(lpf[p]),lorentz_pole_damping_factor(ldf[p]),
+                        lorentz_delta_epsilon(lde[p]);
+                  if (lorentz_pole_damping_factor==0.0)
+                    throw AngoraSettingException(Newmaterialsettings,
+                          "lorentz_pole_damping_factor cannot be zero");
+                  NewMaterial.add_lorentz_pole(lorentz_pole_frequency,
+                                               lorentz_pole_damping_factor,
+                                               lorentz_delta_epsilon);
+                }
+              }
+            }
+          }
+          else {
+            throw AngoraSettingException(Newmaterialsettings,
+            "lorentz_pole_frequency, lorentz_pole_damping_factor, and "
+            "lorentz_delta_epsilon should all be "
+            "numbers or arrays of numbers");
+          }
+        }
+        else {
+          if (!transparent) {
+            NewMaterial.add_lorentz_pole(0.0,0.0,0.0);
+          }
+        }
+
+				/********************************/
 
 				string material_tag;
 				read_value_from_group<string>(Newmaterialsettings,"material_tag",material_tag);

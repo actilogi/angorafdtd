@@ -1,5 +1,5 @@
 /* AUTORIGHTS
-Copyright (C) 2006-2012  Ilker R. Capoglu
+Copyright (C) 2006-2018  Ilker R. Capoglu and Di Zhang
 
     This file is part of the Angora package.
 
@@ -23,11 +23,14 @@ Copyright (C) 2006-2012  Ilker R. Capoglu
 
 #include "Cmat.h"
 
+extern const int vacuum;
+
 extern Array<float,1> eps_x,eps_y,eps_z;
 extern Array<float,1> mu_x,mu_y,mu_z;
 extern Array<float,1> cond_e_x,cond_e_y,cond_e_z;
 extern Array<float,1> cond_h_x,cond_h_y,cond_h_z;
-extern Array<float,1> omega_p_x,omega_p_y,omega_p_z,tau_r_x,tau_r_y,tau_r_z;
+extern Array<float,1> omega_p_x,omega_p_y,omega_p_z,tau_p_x,tau_p_y,tau_p_z,
+                      Omega_p_x,Omega_p_y,Omega_p_z;
 
 
 /** MOVE INTO SEPARATE HEADER **/
@@ -151,31 +154,58 @@ omega_p_z_type add_distinct_omega_p_z(const float& omega)
 	return num_of_distinct_omega_p_z-1;
 }
 
-tau_r_x_type add_distinct_tau_r_x(const float& tau)
+tau_p_x_type add_distinct_tau_p_x(const float& tau)
 {
-	tau_r_x_type num_of_distinct_tau_r_x = tau_r_x.size()+1;
-	tau_r_x.resizeAndPreserve(num_of_distinct_tau_r_x);
-	tau_r_x(num_of_distinct_tau_r_x-1) = tau;
-	return num_of_distinct_tau_r_x-1;
+	tau_p_x_type num_of_distinct_tau_p_x = tau_p_x.size()+1;
+	tau_p_x.resizeAndPreserve(num_of_distinct_tau_p_x);
+	tau_p_x(num_of_distinct_tau_p_x-1) = tau;
+	return num_of_distinct_tau_p_x-1;
 }
 
-tau_r_y_type add_distinct_tau_r_y(const float& tau)
+tau_p_y_type add_distinct_tau_p_y(const float& tau)
 {
-	tau_r_y_type num_of_distinct_tau_r_y = tau_r_y.size()+1;
-	tau_r_y.resizeAndPreserve(num_of_distinct_tau_r_y);
-	tau_r_y(num_of_distinct_tau_r_y-1) = tau;
-	return num_of_distinct_tau_r_y-1;
+	tau_p_y_type num_of_distinct_tau_p_y = tau_p_y.size()+1;
+	tau_p_y.resizeAndPreserve(num_of_distinct_tau_p_y);
+	tau_p_y(num_of_distinct_tau_p_y-1) = tau;
+	return num_of_distinct_tau_p_y-1;
 }
 
-tau_r_z_type add_distinct_tau_r_z(const float& tau)
+tau_p_z_type add_distinct_tau_p_z(const float& tau)
 {
-	tau_r_z_type num_of_distinct_tau_r_z = tau_r_z.size()+1;
-	tau_r_z.resizeAndPreserve(num_of_distinct_tau_r_z);
-	tau_r_z(num_of_distinct_tau_r_z-1) = tau;
-	return num_of_distinct_tau_r_z-1;
+	tau_p_z_type num_of_distinct_tau_p_z = tau_p_z.size()+1;
+	tau_p_z.resizeAndPreserve(num_of_distinct_tau_p_z);
+	tau_p_z(num_of_distinct_tau_p_z-1) = tau;
+	return num_of_distinct_tau_p_z-1;
+}
+
+Omega_p_x_type add_distinct_Omega_p_x(const float& Omega)
+{
+	Omega_p_x_type num_of_distinct_Omega_p_x = Omega_p_x.size()+1;
+	Omega_p_x.resizeAndPreserve(num_of_distinct_Omega_p_x);
+	Omega_p_x(num_of_distinct_Omega_p_x-1) = Omega;
+	return num_of_distinct_Omega_p_x-1;
+}
+
+Omega_p_y_type add_distinct_Omega_p_y(const float& Omega)
+{
+	Omega_p_y_type num_of_distinct_Omega_p_y = Omega_p_y.size()+1;
+	Omega_p_y.resizeAndPreserve(num_of_distinct_Omega_p_y);
+	Omega_p_y(num_of_distinct_Omega_p_y-1) = Omega;
+	return num_of_distinct_Omega_p_y-1;
+}
+
+Omega_p_z_type add_distinct_Omega_p_z(const float& Omega)
+{
+	Omega_p_z_type num_of_distinct_Omega_p_z = Omega_p_z.size()+1;
+	Omega_p_z.resizeAndPreserve(num_of_distinct_Omega_p_z);
+	Omega_p_z(num_of_distinct_Omega_p_z-1) = Omega;
+	return num_of_distinct_Omega_p_z-1;
 }
 /** MOVE INTO SEPARATE HEADER **/
 
+Cmat::Cmat()
+ : _num_lrntz_poles(0) {
+}
 
 void Cmat::set_eps(const float& epsilon_r)
 {
@@ -253,48 +283,44 @@ void Cmat::set_cond_h_z(const float& sigma_h)
 	_cond_h_z_ptr.reset(new cond_h_z_type(add_distinct_cond_h_z(sigma_h)));
 }
 
-void Cmat::set_omega_p(const float& omega)
+/* In test: add Omega_p materials */
+void Cmat::set_Omega_p(const float& Omega)
 {
-	set_omega_p_x(omega);
-	set_omega_p_y(omega);
-	set_omega_p_z(omega);
+  _Omega_p_x_vec.push_back(add_distinct_Omega_p_x(Omega));
+  _Omega_p_y_vec.push_back(add_distinct_Omega_p_y(Omega));
+  _Omega_p_z_vec.push_back(add_distinct_Omega_p_z(Omega));
 }
 
-void Cmat::set_omega_p_x(const float& omega)
-{
-	_omega_p_x_ptr.reset(new omega_p_x_type(add_distinct_omega_p_x(omega)));
+void Cmat::add_drude_pole(const float& omega_p,const float& tau_p) {
+  //increment number of poles
+  _num_lrntz_poles++;
+  //assign pole parameters
+  _omega_p_x_vec.push_back(vacuum); //<-not the same as Lorentz's omega!!
+  _omega_p_y_vec.push_back(vacuum);
+  _omega_p_z_vec.push_back(vacuum);
+  _tau_p_x_vec.push_back(add_distinct_tau_p_x(2*tau_p));
+  _tau_p_y_vec.push_back(add_distinct_tau_p_y(2*tau_p));
+  _tau_p_z_vec.push_back(add_distinct_tau_p_z(2*tau_p));
+  _Omega_p_x_vec.push_back(add_distinct_Omega_p_x(omega_p));
+  _Omega_p_y_vec.push_back(add_distinct_Omega_p_y(omega_p));
+  _Omega_p_z_vec.push_back(add_distinct_Omega_p_z(omega_p));
 }
 
-void Cmat::set_omega_p_y(const float& omega)
-{
-	_omega_p_y_ptr.reset(new omega_p_y_type(add_distinct_omega_p_y(omega)));
-}
-
-void Cmat::set_omega_p_z(const float& omega)
-{
-	_omega_p_z_ptr.reset(new omega_p_z_type(add_distinct_omega_p_z(omega)));
-}
-
-void Cmat::set_tau_r(const float& tau)
-{
-	set_tau_r_x(tau);
-	set_tau_r_y(tau);
-	set_tau_r_z(tau);
-}
-
-void Cmat::set_tau_r_x(const float& tau)
-{
-	_tau_r_x_ptr.reset(new tau_r_x_type(add_distinct_tau_r_x(tau)));
-}
-
-void Cmat::set_tau_r_y(const float& tau)
-{
-	_tau_r_y_ptr.reset(new tau_r_y_type(add_distinct_tau_r_y(tau)));
-}
-
-void Cmat::set_tau_r_z(const float& tau)
-{
-	_tau_r_z_ptr.reset(new tau_r_z_type(add_distinct_tau_r_z(tau)));
+void Cmat::add_lorentz_pole(const float& omega_p,
+                            const float& delta_p,
+                            const float& deps_p) {
+  //increment number of poles
+  _num_lrntz_poles++;
+  //assign pole parameters
+  _omega_p_x_vec.push_back(add_distinct_omega_p_x(omega_p));
+  _omega_p_y_vec.push_back(add_distinct_omega_p_y(omega_p));
+  _omega_p_z_vec.push_back(add_distinct_omega_p_z(omega_p));
+  _tau_p_x_vec.push_back(add_distinct_tau_p_x(1./delta_p));
+  _tau_p_y_vec.push_back(add_distinct_tau_p_y(1./delta_p));
+  _tau_p_z_vec.push_back(add_distinct_tau_p_z(1./delta_p));
+  _Omega_p_x_vec.push_back(add_distinct_Omega_p_x(sqrt(deps_p)*omega_p));
+  _Omega_p_y_vec.push_back(add_distinct_Omega_p_y(sqrt(deps_p)*omega_p));
+  _Omega_p_z_vec.push_back(add_distinct_Omega_p_z(sqrt(deps_p)*omega_p));
 }
 
 bool Cmat::eps_x_exists() const
@@ -355,36 +381,6 @@ bool Cmat::cond_h_y_exists() const
 bool Cmat::cond_h_z_exists() const
 {
 	return _cond_h_z_ptr;
-}
-
-bool Cmat::omega_p_x_exists() const
-{
-	return _omega_p_x_ptr;
-}
-
-bool Cmat::omega_p_y_exists() const
-{
-	return _omega_p_y_ptr;
-}
-
-bool Cmat::omega_p_z_exists() const
-{
-	return _omega_p_z_ptr;
-}
-
-bool Cmat::tau_r_x_exists() const
-{
-	return _tau_r_x_ptr;
-}
-
-bool Cmat::tau_r_y_exists() const
-{
-	return _tau_r_y_ptr;
-}
-
-bool Cmat::tau_r_z_exists() const
-{
-	return _tau_r_z_ptr;
 }
 
 eps_x_type Cmat::eps_x_index() const
@@ -531,76 +527,58 @@ cond_h_z_type Cmat::cond_h_z_index() const
 	}
 }
 
-omega_p_x_type Cmat::omega_p_x_index() const
+omega_p_x_type Cmat::omega_p_x_index(const int& p) const
 {
-	if (omega_p_x_exists())
-	{
-		return *_omega_p_x_ptr;
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("omega_p_x");
-	}
+  return _omega_p_x_vec[p];
+  //may throw exception if pole doesn't exist
 }
 
-omega_p_y_type Cmat::omega_p_y_index() const
+omega_p_y_type Cmat::omega_p_y_index(const int& p) const
 {
-	if (omega_p_y_exists())
-	{
-		return *_omega_p_y_ptr;
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("omega_p_y");
-	}
+  return _omega_p_y_vec[p];
+  //may throw exception if pole doesn't exist
 }
 
-omega_p_z_type Cmat::omega_p_z_index() const
+omega_p_z_type Cmat::omega_p_z_index(const int& p) const
 {
-	if (omega_p_z_exists())
-	{
-		return *_omega_p_z_ptr;
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("omega_p_z");
-	}
+  return _omega_p_z_vec[p];
+  //may throw exception if pole doesn't exist
 }
 
-tau_r_x_type Cmat::tau_r_x_index() const
+tau_p_x_type Cmat::tau_p_x_index(const int& p) const
 {
-	if (tau_r_x_exists())
-	{
-		return *_tau_r_x_ptr;
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("tau_r_x");
-	}
+  return _tau_p_x_vec[p];
+  //may throw exception if pole doesn't exist
 }
 
-tau_r_y_type Cmat::tau_r_y_index() const
+tau_p_y_type Cmat::tau_p_y_index(const int& p) const
 {
-	if (tau_r_y_exists())
-	{
-		return *_tau_r_y_ptr;
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("tau_r_y");
-	}
+  return _tau_p_y_vec[p];
+  //may throw exception if pole doesn't exist
 }
 
-tau_r_z_type Cmat::tau_r_z_index() const
+tau_p_z_type Cmat::tau_p_z_index(const int& p) const
 {
-	if (tau_r_z_exists())
-	{
-		return *_tau_r_z_ptr;
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("tau_r_z");
-	}
+  return _tau_p_z_vec[p];
+  //may throw exception if pole doesn't exist
+}
+
+Omega_p_x_type Cmat::Omega_p_x_index(const int& p) const
+{
+  return _Omega_p_x_vec[p];
+  //may throw exception if pole doesn't exist
+}
+
+Omega_p_y_type Cmat::Omega_p_y_index(const int& p) const
+{
+  return _Omega_p_y_vec[p];
+  //may throw exception if pole doesn't exist
+}
+
+Omega_p_z_type Cmat::Omega_p_z_index(const int& p) const
+{
+  return _Omega_p_z_vec[p];
+  //may throw exception if pole doesn't exist
 }
 
 float Cmat::eps_x_value() const
@@ -747,74 +725,71 @@ float Cmat::cond_h_z_value() const
 	}
 }
 
-float Cmat::omega_p_x_value() const
+float Cmat::omega_p_x_value(const int& p) const
 {
-	if (omega_p_x_exists())
-	{
-		return omega_p_x(*_omega_p_x_ptr);
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("omega_p_x");
-	}
+  return omega_p_x(_omega_p_x_vec[p]);
+  //may throw exception if pole doesn't exist
 }
 
-float Cmat::omega_p_y_value() const
+float Cmat::omega_p_y_value(const int& p) const
 {
-	if (omega_p_y_exists())
-	{
-		return omega_p_y(*_omega_p_y_ptr);
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("omega_p_y");
-	}
+  return omega_p_y(_omega_p_y_vec[p]);
+  //may throw exception if pole doesn't exist
 }
 
-float Cmat::omega_p_z_value() const
+float Cmat::omega_p_z_value(const int& p) const
 {
-	if (omega_p_z_exists())
-	{
-		return omega_p_z(*_omega_p_z_ptr);
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("omega_p_z");
-	}
+  return omega_p_z(_omega_p_z_vec[p]);
+  //may throw exception if pole doesn't exist
 }
 
-float Cmat::tau_r_x_value() const
+float Cmat::tau_p_x_value(const int& p) const
 {
-	if (tau_r_x_exists())
-	{
-		return tau_r_x(*_tau_r_x_ptr);
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("tau_r_x");
-	}
+  return tau_p_x(_tau_p_x_vec[p]);
+  //may throw exception if pole doesn't exist
 }
 
-float Cmat::tau_r_y_value() const
+float Cmat::tau_p_y_value(const int& p) const
 {
-	if (tau_r_y_exists())
-	{
-		return tau_r_y(*_tau_r_y_ptr);
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("tau_r_y");
-	}
+  return tau_p_y(_tau_p_y_vec[p]);
+  //may throw exception if pole doesn't exist
 }
 
-float Cmat::tau_r_z_value() const
+float Cmat::tau_p_z_value(const int& p) const
 {
-	if (tau_r_z_exists())
-	{
-		return tau_r_z(*_tau_r_z_ptr);
-	}
-	else
-	{
-		throw MaterialPropertyDoesNotExist("tau_r_z");
-	}
+  return tau_p_z(_tau_p_z_vec[p]);
+  //may throw exception if pole doesn't exist
+}
+
+float Cmat::Omega_p_x_value(const int& p) const
+{
+  return Omega_p_x(_Omega_p_x_vec[p]);
+  //may throw exception if pole doesn't exist
+}
+
+float Cmat::Omega_p_y_value(const int& p) const
+{
+  return Omega_p_y(_Omega_p_y_vec[p]);
+  //may throw exception if pole doesn't exist
+}
+
+float Cmat::Omega_p_z_value(const int& p) const
+{
+  return Omega_p_z(_Omega_p_z_vec[p]);
+  //may throw exception if pole doesn't exist
+}
+
+//Returns the number of "effective" poles, meaning that
+//the ones with zero pole frequency don't count
+int Cmat::eff_num_lrntz_poles() const {
+  int num_poles(0);
+  for (int p(0); p<_num_lrntz_poles;++p) {
+    //Omega_p=(sqrt(delta_eps) x pole frequency) is in the numerator,
+    //so should be nonzero for the pole to contribute.
+    //Same goes for tau_p (pole relaxation time).
+    if ((Omega_p_x(_Omega_p_x_vec[p])!=0.0)&&(tau_p_x(_tau_p_x_vec[p])!=0.0)) {
+      num_poles++;
+    }
+  }
+  return num_poles;
 }
